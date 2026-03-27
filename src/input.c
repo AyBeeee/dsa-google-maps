@@ -3,14 +3,13 @@
 #include "linked_list.h"
 
 
-int ask_map() {
+char* ask_map(char *map) {
     
-    char map[10];
+    printf("Enter map name (e.g. 'xs_2' or 'xl_1'): ");
+    scanf("%s", map);
 
-    printf("Enter map name: ");
-    scanf("%s", &map);
-    
     return map;
+
 }
 
 house* ask_origin() {
@@ -24,7 +23,7 @@ house* ask_origin() {
     // ask the user for an address and store it in the house linked list.
     if (origin_num == 1) {
         printf("Enter street name (e.g. 'Carrer de Roc Boronat'): ");
-        scanf("%s", &newnode->street);
+        scanf("%s", newnode->street);
 
         printf("Enter street number (e.g. '138'): ");
         scanf("%d", &newnode->address_num);
@@ -33,15 +32,9 @@ house* ask_origin() {
     // if the options are different than one, not implemented.
     else {
         printf("Not implemented yet");
-        return 1;
+        free(newnode);
+        return NULL;
     }
 
     return newnode;
-}
-
-int main() {        
-
-    ask_map();
-    ask_origin();
-
 }
