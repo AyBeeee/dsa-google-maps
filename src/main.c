@@ -1,8 +1,4 @@
-#include "sample_lib.h"
-#include <dirent.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
+#include "main.h"
 
 void createaleak() {
   char *foo = malloc(20 * sizeof(char));
@@ -13,7 +9,7 @@ int main() {
   printf("*****************\nWelcome to DSA!\n*****************\n");
 
   // how to import and call a function
-  printf("Factorial of 4 is %d\n", fact(4));
+  parse_map_wrapper("md_1");
 
   // uncomment and run "make v" to see how valgrind detects memory leaks
   // createaleak();
