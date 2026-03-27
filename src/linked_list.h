@@ -3,9 +3,9 @@
 
 typedef struct node {
 
-    char street[65];
-    int address_num;
-    float coordinate; 
-    struct node *next;
+  char street[65];
+  int address_num;
+  float coordinate;
+  struct node *next;
 
 } house;
