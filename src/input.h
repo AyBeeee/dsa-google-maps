@@ -15,6 +15,6 @@ typedef struct {
     node* head;
     node* tail;
     int size;
-} houses;
+} list;
 
 #endif

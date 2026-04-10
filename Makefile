@@ -1,19 +1,19 @@
 SRC_FILES := $(filter-out src/main.c, $(wildcard src/*.c))
 
 compile:
-	gcc -Wall -Wextra -Werror src/main.c $(SRC_FILES) -o main.out -lm
-	
+	gcc -Wall -Wextra -Werror src/main.c $(SRC_FILES) -o main.out -lm -g
+
 r:
 	make compile
 	./main.out
 
-v: 
+v:
 	make compile
-	valgrind --leak-check=yes ./main.out
+	valgrind --leak-check=yes --track-origins=yes ./main.out
 
-vm: 
+vm:
 	make compile
-	valgrind --tool=massif ./main.out 
+	valgrind --tool=massif ./main.out
 
 compiledebug:
 	gcc src/main.c $(SRC_FILES) -fsanitize=address -g -o main.out -lm
@@ -41,7 +41,7 @@ dt:
 	DEBUGINFOD_URLS="" gdb ./test.out
 
 c:
-	rm main.out || true 
+	rm main.out || true
 	rm test.out || true
 
 f:

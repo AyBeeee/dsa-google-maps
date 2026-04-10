@@ -4,9 +4,9 @@
 #include "parsing.h"
 #include <string.h>
 
-houses* ask_map() {
+list* ask_map() {
 
-  houses *house = malloc(sizeof(house));
+  list *house = malloc(sizeof(house));
   house->head = NULL;
   house->tail = NULL;
   house->size = 0;
@@ -19,13 +19,13 @@ houses* ask_map() {
   strcmp(house->map, "xl_1") == 0 || strcmp(house->map, "2xl_1") == 0) {
 
     int loaded = load_map(house);
-    
+
     if (loaded == -1) {
-        printf("No houses loaded\n");
+        printf("No list loaded\n");
         return NULL;
     }
 
-    printf("Houses loaded %d", loaded);
+    printf("list loaded %d", loaded);
     printf("\n");
     ask_address(house);
   }
@@ -39,8 +39,8 @@ houses* ask_map() {
   return house;
 }
 
-void ask_address(houses *house) { // pass the malloc from map
-    
+void ask_address(list *house) { // pass the malloc from map
+
   int option;
   printf("--- ORIGIN ---\n");
   printf("Where are you? Address (1), Place (2) or Coordinate (3)?\n");
