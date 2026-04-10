@@ -59,15 +59,15 @@ int find_address(list *house_list, char *street, int num) {
 
     node *curr = house_list->head; // start search at head
     node *best_match = NULL; // init best match
-    int best_dist = 5;
-    int threshold = 5;
+    int best_dist = 7;
+    int threshold = 7;
     char choice;
 
     // convert to lower
     for (int i = 0; i<(int)strlen(street); i++) {
         street[i] = tolower(street[i]);
     }
-    printf("Street to lower: %s\n", street);
+    printf("Street to lower: %s.\n", street); //DEBUG
 
     for(int i=0; i<house_list->size; i++) {
 
@@ -81,7 +81,7 @@ int find_address(list *house_list, char *street, int num) {
         // compare using distance to find most similar one
         else {
             int dist = LevenshteinDistance(curr->street, street);
-
+            //printf("dist calculated is: %i\n", dist); //DEBUG
             if (dist < best_dist) {
                 best_dist = dist;
                 best_match = curr;
@@ -92,6 +92,7 @@ int find_address(list *house_list, char *street, int num) {
 
     if (best_dist < threshold && best_match != NULL) {
         printf("We couldn't find the address, did you mean: %s %d [Y-N]\n", best_match->street, best_match->num);
+        //TODO LevenshteinDistance for the address number
         scanf(" %c", &choice);
 
         if (choice == 'Y') {
@@ -134,7 +135,7 @@ int LevenshteinDistance(char *a, char *b) {
             int del = matrix[i-1][j] + 1;
             int ins = matrix[i][j-1] + 1;
             int sub = matrix[i-1][j-1] + cost;
-            
+
             if (del < ins && del < sub) {
                 matrix[i][j] = del;
             } else if (ins < sub) {

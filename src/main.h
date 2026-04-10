@@ -3,7 +3,7 @@
 
 #include "input.h"
 
-list* ask_map();
+void ask_map();
 void ask_address(list *h);
 
 #endif

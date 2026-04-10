@@ -4,42 +4,50 @@
 #include "parsing.h"
 #include <string.h>
 
-list* ask_map() {
+void free_list(list *house_list)
+{
+    node *temp;
+    while (house_list->head)
+    {
+        temp = house_list->head->next;
+        free(house_list->head);
+        house_list->head = temp;
+    }
+}
 
-  list *house = malloc(sizeof(house));
-  house->head = NULL;
-  house->tail = NULL;
-  house->size = 0;
+void ask_map() {
+
+  list house_list;
+  house_list.head = NULL;
+  house_list.tail = NULL;
+  house_list.size = 0;
 
   printf("Enter map name (e.g. 'xs_2' or 'xl_1'): ");
-  scanf("%s", house->map);
+  scanf("%s", house_list.map);
 
-  if (strcmp(house->map, "xs_1") == 0 || strcmp(house->map, "xs_2") == 0 ||
-  strcmp(house->map, "md_1") == 0 || strcmp(house->map, "lg_1") == 0 ||
-  strcmp(house->map, "xl_1") == 0 || strcmp(house->map, "2xl_1") == 0) {
+  if (strcmp(house_list.map, "xs_1") == 0 || strcmp(house_list.map, "xs_2") == 0 ||
+  strcmp(house_list.map, "md_1") == 0 || strcmp(house_list.map, "lg_1") == 0 ||
+  strcmp(house_list.map, "xl_1") == 0 || strcmp(house_list.map, "2xl_1") == 0) {
 
-    int loaded = load_map(house);
+    int loaded = load_map(&house_list);
 
     if (loaded == -1) {
         printf("No list loaded\n");
-        return NULL;
+        return ;
     }
 
     printf("list loaded %d", loaded);
     printf("\n");
-    ask_address(house);
+    ask_address(&house_list);
   }
 
   else {
     printf("Not found\n");
-    free(house);
-    return NULL;
   }
-
-  return house;
+  free_list(&house_list);
 }
 
-void ask_address(list *house) { // pass the malloc from map
+void ask_address(list *house_list) { // pass the malloc from map
 
   int option;
   printf("--- ORIGIN ---\n");
@@ -57,7 +65,7 @@ void ask_address(list *house) { // pass the malloc from map
       printf("Enter street number (e.g. '138'): \n");
       scanf("%d", &num);
 
-      find_address(house, street, num);
+      find_address(house_list, street, num);
   }
 
   else {
