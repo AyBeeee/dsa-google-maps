@@ -1,18 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "main.h" // already includes input.h so no need for the input.h file
 #include "parsing.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-void free_list(list *house_list)
-{
-    node *temp;
-    while (house_list->head)
-    {
-        temp = house_list->head->next;
-        free(house_list->head);
-        house_list->head = temp;
-    }
+void free_list(list *house_list) {
+  node *temp;
+  while (house_list->head) {
+    temp = house_list->head->next;
+    free(house_list->head);
+    house_list->head = temp;
+  }
 }
 
 void ask_map() {
@@ -25,15 +23,18 @@ void ask_map() {
   printf("Enter map name (e.g. 'xs_2' or 'xl_1'): ");
   scanf("%s", house_list.map);
 
-  if (strcmp(house_list.map, "xs_1") == 0 || strcmp(house_list.map, "xs_2") == 0 ||
-  strcmp(house_list.map, "md_1") == 0 || strcmp(house_list.map, "lg_1") == 0 ||
-  strcmp(house_list.map, "xl_1") == 0 || strcmp(house_list.map, "2xl_1") == 0) {
+  if (strcmp(house_list.map, "xs_1") == 0 ||
+      strcmp(house_list.map, "xs_2") == 0 ||
+      strcmp(house_list.map, "md_1") == 0 ||
+      strcmp(house_list.map, "lg_1") == 0 ||
+      strcmp(house_list.map, "xl_1") == 0 ||
+      strcmp(house_list.map, "2xl_1") == 0) {
 
     int loaded = load_map(&house_list);
 
     if (loaded == -1) {
-        printf("No list loaded\n");
-        return ;
+      printf("No list loaded\n");
+      return;
     }
 
     printf("list loaded %d", loaded);
@@ -56,19 +57,19 @@ void ask_address(list *house_list) { // pass the malloc from map
 
   if (option == 1) {
 
-      char street[50];
-      int num;
+    char street[50];
+    int num;
 
-      printf("Enter street name (e.g. 'Carrer de Roc Boronat'): \n");
-      scanf(" %49[^\n]", street);
+    printf("Enter street name (e.g. 'Carrer de Roc Boronat'): \n");
+    scanf(" %49[^\n]", street);
 
-      printf("Enter street number (e.g. '138'): \n");
-      scanf("%d", &num);
+    printf("Enter street number (e.g. '138'): \n");
+    scanf("%d", &num);
 
-      find_address(house_list, street, num);
+    find_address(house_list, street, num);
   }
 
   else {
-      printf("Not implemented yet\n");
+    printf("Not implemented yet\n");
   }
 }
