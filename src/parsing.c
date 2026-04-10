@@ -108,5 +108,41 @@ int find_address(list *house_list, char *street, int num) {
 }
 
 int LevenshteinDistance(char *a, char *b) {
-    // TO-DO Levenshtein distance
+    int la = strlen(a);
+    int lb = strlen(b);
+    int cost;
+    int matrix[la+1][lb+1];
+
+
+    for (int i=0; i<=la; i++) {
+        matrix[i][0] = i;
+    }
+
+    for (int j = 0; j<=lb; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (int i = 1; i<=la; i++) {
+        for (int j=1; j<=lb; j++) {
+            if (a[i-1] == b[j-1]) {
+                cost = 0; // looks in diagonal and if the cost is 0 keeps the same number because it will be adding them until the end bottom right corner
+            }
+            else {
+                cost = 1;
+            }
+
+            int del = matrix[i-1][j] + 1;
+            int ins = matrix[i][j-1] + 1;
+            int sub = matrix[i-1][j-1] + cost;
+            
+            if (del < ins && del < sub) {
+                matrix[i][j] = del;
+            } else if (ins < sub) {
+                matrix[i][j] = ins;
+            } else {
+                matrix[i][j] = sub;
+            }
+        }
+    }
+    return matrix[la][lb];
 }
