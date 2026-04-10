@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 #include "main.h"
 
 void createaleak() {
@@ -6,13 +9,6 @@ void createaleak() {
 }
 
 int main() {
-  printf("*****************\nWelcome to DSA!\n*****************\n");
-
-  // how to import and call a function
-  parse_map_wrapper("md_1");
-
-  // uncomment and run "make v" to see how valgrind detects memory leaks
-  // createaleak();
-
+  ask_map();
   return 0;
 }
