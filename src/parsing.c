@@ -60,6 +60,8 @@ int find_address(list *house_list, char *street, int num) {
   node *best_match = NULL;       // init best match
   int best_dist = 7;
   int threshold = 7;
+  int street_found = 0;
+  int chosen_num;
   char choice;
 
   // convert to lower
@@ -72,6 +74,7 @@ int find_address(list *house_list, char *street, int num) {
 
     // compare exact match
     if (strcmp(curr->street, street) == 0) {
+      street_found = 1;
       if (curr->num == num) {
         printf("Found at %lf | %lf\n", curr->lat, curr->lon);
         return 1;
@@ -87,6 +90,35 @@ int find_address(list *house_list, char *street, int num) {
       }
     }
     curr = curr->next;
+  }
+
+  if (street_found) {
+    printf("We found the street, but number %d is not valid.\n", num);
+    printf("Valid numbers in %s: ", street);
+
+    curr = house_list->head;
+    while (curr != NULL) {
+      if (strcmp(curr->street, street) == 0) {
+        printf("%d ", curr->num);
+      }
+      curr = curr->next;
+    }
+    printf("\n");
+
+    printf("Choose one of these numbers: ");
+    scanf("%d", &chosen_num);
+
+    curr = house_list->head;
+    while (curr != NULL) {
+      if (strcmp(curr->street, street) == 0 && curr->num == chosen_num) {
+        printf("Found at %lf | %lf\n", curr->lat, curr->lon);
+        return 1;
+      }
+      curr = curr->next;
+    }
+
+    printf("That number is not valid for this street\n");
+    return -1;
   }
 
   if (best_dist < threshold && best_match != NULL) {
