@@ -19,6 +19,11 @@ void ask_map() {
   house_list.head = NULL;
   house_list.tail = NULL;
   house_list.size = 0;
+  
+  list list_places;
+  list_places.head = NULL;
+  list_places.tail = NULL;
+  list_places.size = 0;
 
   printf("Enter map name (e.g. 'xs_2' or 'xl_1'): ");
   scanf("%s", house_list.map);
@@ -31,8 +36,9 @@ void ask_map() {
       strcmp(house_list.map, "2xl_1") == 0) {
 
     int loaded = load_map(&house_list);
+    int loaded_places = load_places(&list_places);
 
-    if (loaded == -1) {
+    if (loaded == -1 || loaded_places == -1) {
       printf("No list loaded\n");
       return;
     }
@@ -69,7 +75,22 @@ void ask_address(list *house_list) { // pass the malloc from map
     find_address(house_list, street, num);
   }
 
+  else if(option == 2){
+
+    char street[50];
+    int num;
+
+    printf("Enter place name (e.g. 'Universitat Pompeu Fabra–Campus del Poblenou' or 'L'Illa Diagonal'):\n");
+    scanf(" %49[^\n]", street);
+
+    printf("Enter street number (e.g. '138'): \n");
+    scanf("%d", &num);
+
+    find_places(house_list, street, num);
+  }
+
   else {
     printf("Not implemented yet\n");
   }
+
 }

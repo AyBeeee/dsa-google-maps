@@ -6,7 +6,6 @@
 #include <string.h>
 
 int load_map(list *house_list) {
-
   // create route
   char route[256] = "maps/";
   strcat(route, house_list->map);
@@ -53,6 +52,54 @@ int load_map(list *house_list) {
   fclose(fp);
   return house_list->size;
 }
+
+int load_places(list_places *places_list) {
+  
+  char route[256] = "maps/";
+  strcat(route, places_list->place);
+  strcat(route, "/places.txt");
+  printf("Current route: %s\n", route);
+
+  // open file
+  FILE *fp = fopen(route, "r");
+
+  if (fp == NULL) {
+    printf("Couldn't find the file/or it is empty\n");
+    return -1;
+  }
+
+  // load list
+  char line[256];
+  while (fgets(line, sizeof(line), fp)) { // load line by line with fgets
+
+    node_places *newnode = malloc(sizeof(node_places)); // creating one list per address
+
+    if (newnode == NULL) {
+      fclose(fp);
+      return -1;
+    }
+
+    sscanf(line, "%49[^,],%49[^,],%49[:^,],%lf,%lf", newnode->id, &newnode->name, &newnode->amenity, &newnode->lat, &newnode->lon);
+
+    for (int i = 0; i < (int)strlen(newnode->name); i++) {
+      newnode->name[i] = tolower(newnode->name[i]);
+    }
+
+    newnode->next = NULL; // initialize the next node to null
+
+    if (places_list->head == NULL) {
+      places_list->head = newnode;
+      places_list->tail = newnode;
+    } else {
+      places_list->tail->next = newnode;
+      places_list->tail = newnode;
+    }
+    places_list->size++;
+  }
+  fclose(fp);
+  return places_list->size;
+}
+//int find_places()
 
 int find_address(list *house_list, char *street, int num) {
 
