@@ -4,57 +4,61 @@
 #include <stdlib.h>
 #include <string.h>
 
-void free_list(list *house_list) {
+void free_map(list_map *list) {
   node *temp;
-  while (house_list->head) {
-    temp = house_list->head->next;
-    free(house_list->head);
-    house_list->head = temp;
+  while (list->head_houses) {
+    temp = list->head_houses->next;
+    free(list->head_houses->house);
+    free(list->head_houses);
+    list->head_houses = temp;
   }
+  while (list->head_places) {
+    temp = list->head_places->next;
+    free(list->head_places->place);
+    free(list->head_places);
+    list->head_places = temp;
+  }
+  // TODO add for streets eventually
 }
 
 void ask_map() {
 
-  list house_list;
-  house_list.head = NULL;
-  house_list.tail = NULL;
-  house_list.size = 0;
-  
-  list list_places;
-  list_places.head = NULL;
-  list_places.tail = NULL;
-  list_places.size = 0;
+  list_map list;
+  list.head_houses = NULL;
+  list.tail_houses = NULL;
+  list.size_houses = 0;
+
+  list.head_places = NULL;
+  list.tail_places = NULL;
+  list.size_places = 0;
 
   printf("Enter map name (e.g. 'xs_2' or 'xl_1'): ");
-  scanf("%s", house_list.map);
+  scanf("%s", list.map);
 
-  if (strcmp(house_list.map, "xs_1") == 0 ||
-      strcmp(house_list.map, "xs_2") == 0 ||
-      strcmp(house_list.map, "md_1") == 0 ||
-      strcmp(house_list.map, "lg_1") == 0 ||
-      strcmp(house_list.map, "xl_1") == 0 ||
-      strcmp(house_list.map, "2xl_1") == 0) {
+  if (strcmp(list.map, "xs_1") == 0 || strcmp(list.map, "xs_2") == 0 ||
+      strcmp(list.map, "md_1") == 0 || strcmp(list.map, "lg_1") == 0 ||
+      strcmp(list.map, "xl_1") == 0 || strcmp(list.map, "2xl_1") == 0) {
 
-    int loaded = load_map(&house_list);
-    int loaded_places = load_places(&list_places);
+    int loaded_houses = load_houses(&list);
+    int loaded_places = load_places(&list);
 
-    if (loaded == -1 || loaded_places == -1) {
+    if (loaded_houses == -1 || loaded_places == -1) {
       printf("No list loaded\n");
       return;
     }
 
-    printf("list loaded %d", loaded);
-    printf("\n");
-    ask_address(&house_list);
+    printf("Houses loaded: %d\n", loaded_houses);
+    printf("Places loaded: %d\n", loaded_houses);
+    ask_address(&list);
   }
 
   else {
     printf("Not found\n");
   }
-  free_list(&house_list);
+  free_map(&list);
 }
 
-void ask_address(list *house_list) { // pass the malloc from map
+void ask_address(list_map *list) { // pass the malloc from ask_map
 
   int option;
   printf("--- ORIGIN ---\n");
@@ -64,33 +68,25 @@ void ask_address(list *house_list) { // pass the malloc from map
   if (option == 1) {
 
     char street[50];
-    int num;
 
     printf("Enter street name (e.g. 'Carrer de Roc Boronat'): \n");
     scanf(" %49[^\n]", street);
 
-    printf("Enter street number (e.g. '138'): \n");
-    scanf("%d", &num);
-
-    find_address(house_list, street, num);
+    find_node(list, street, HOUSES);
   }
 
-  else if(option == 2){
+  else if (option == 2) {
 
     char street[50];
-    int num;
 
-    printf("Enter place name (e.g. 'Universitat Pompeu Fabra–Campus del Poblenou' or 'L'Illa Diagonal'):\n");
+    printf("Enter place name (e.g. 'Universitat Pompeu Fabra–Campus del "
+           "Poblenou' or 'L'Illa Diagonal'):\n");
     scanf(" %49[^\n]", street);
 
-    printf("Enter street number (e.g. '138'): \n");
-    scanf("%d", &num);
-
-    find_places(house_list, street, num);
+    find_node(list, street, PLACES);
   }
 
   else {
     printf("Not implemented yet\n");
   }
-
 }

@@ -4,6 +4,6 @@
 #include "input.h"
 
 void ask_map();
-void ask_address(list *h);
+void ask_address(list_map *h);
 
 #endif

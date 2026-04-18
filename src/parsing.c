@@ -5,12 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-int load_map(list *house_list) {
+int load_houses(list_map *list) {
   // create route
   char route[256] = "maps/";
-  strcat(route, house_list->map);
+  strcat(route, list->map);
   strcat(route, "/houses.txt");
-  printf("Current route: %s\n", route);
+  printf("Current route: %s\n", route); // DEBUG
 
   // open file
   FILE *fp = fopen(route, "r");
@@ -24,62 +24,23 @@ int load_map(list *house_list) {
   char line[256];
   while (fgets(line, sizeof(line), fp)) { // load line by line with fgets
 
-    node *newnode = malloc(sizeof(node)); // creating one list per address
-
+    node *newnode = malloc(sizeof(node));
     if (newnode == NULL) {
       fclose(fp);
       return -1;
     }
 
-    sscanf(line, "%49[^,],%d,%lf,%lf", newnode->street, &newnode->num,
+    newnode->house = malloc(sizeof(data_houses));
+    newnode->place = NULL;
+
+    if (newnode->house == NULL) {
+      fclose(fp);
+      free(newnode);
+      return -1;
+    }
+
+    sscanf(line, "%49[^,],%d,%lf,%lf", newnode->name, &(newnode->house->num),
            &newnode->lat, &newnode->lon);
-
-    for (int i = 0; i < (int)strlen(newnode->street); i++) {
-      newnode->street[i] = tolower(newnode->street[i]);
-    }
-
-    newnode->next = NULL; // initialize the next node to null
-
-    if (house_list->head == NULL) {
-      house_list->head = newnode;
-      house_list->tail = newnode;
-    } else {
-      house_list->tail->next = newnode;
-      house_list->tail = newnode;
-    }
-    house_list->size++;
-  }
-  fclose(fp);
-  return house_list->size;
-}
-
-int load_places(list_places *places_list) {
-  
-  char route[256] = "maps/";
-  strcat(route, places_list->place);
-  strcat(route, "/places.txt");
-  printf("Current route: %s\n", route);
-
-  // open file
-  FILE *fp = fopen(route, "r");
-
-  if (fp == NULL) {
-    printf("Couldn't find the file/or it is empty\n");
-    return -1;
-  }
-
-  // load list
-  char line[256];
-  while (fgets(line, sizeof(line), fp)) { // load line by line with fgets
-
-    node_places *newnode = malloc(sizeof(node_places)); // creating one list per address
-
-    if (newnode == NULL) {
-      fclose(fp);
-      return -1;
-    }
-
-    sscanf(line, "%49[^,],%49[^,],%49[:^,],%lf,%lf", newnode->id, &newnode->name, &newnode->amenity, &newnode->lat, &newnode->lon);
 
     for (int i = 0; i < (int)strlen(newnode->name); i++) {
       newnode->name[i] = tolower(newnode->name[i]);
@@ -87,49 +48,128 @@ int load_places(list_places *places_list) {
 
     newnode->next = NULL; // initialize the next node to null
 
-    if (places_list->head == NULL) {
-      places_list->head = newnode;
-      places_list->tail = newnode;
+    if (list->head_houses == NULL) {
+      list->head_houses = newnode;
+      list->tail_houses = newnode;
     } else {
-      places_list->tail->next = newnode;
-      places_list->tail = newnode;
+      list->tail_houses->next = newnode;
+      list->tail_houses = newnode;
     }
-    places_list->size++;
+    list->size_houses++;
   }
   fclose(fp);
-  return places_list->size;
+  return list->size_houses;
 }
-//int find_places()
 
-int find_address(list *house_list, char *street, int num) {
+int load_places(list_map *list) {
 
-  node *curr = house_list->head; // start search at head
-  node *best_match = NULL;       // init best match
+  char route[256] = "maps/";
+  strcat(route, list->map);
+  strcat(route, "/places.txt");
+  printf("Current route: %s\n", route); // DEBUG
+
+  // open file
+  FILE *fp = fopen(route, "r");
+
+  if (fp == NULL) {
+    printf("Couldn't find the file/or it is empty\n");
+    return -1;
+  }
+
+  // load list
+  char line[256];
+  while (fgets(line, sizeof(line), fp)) { // load line by line with fgets
+
+    node *newnode = malloc(sizeof(node));
+    if (newnode == NULL) {
+      fclose(fp);
+      return -1;
+    }
+
+    newnode->place = malloc(sizeof(data_places));
+    newnode->house = NULL;
+
+    if (newnode->place == NULL) {
+      fclose(fp);
+      free(newnode);
+      return -1;
+    }
+
+    sscanf(line, "%49[^,],%49[^,],%49[^,],%lf,%lf", newnode->place->id,
+           newnode->name, newnode->place->amenity, &newnode->lat,
+           &newnode->lon);
+    // printf("parsed and saved %s, %s, %s, %f, %f\n", newnode->place->id,
+    // newnode->name, newnode->place->amenity, newnode->lat, newnode->lon);
+    // //DEBUG
+
+    for (int i = 0; i < (int)strlen(newnode->name); i++) {
+      newnode->name[i] = tolower(newnode->name[i]);
+    }
+
+    newnode->next = NULL; // initialize the next node to null
+
+    if (list->head_places == NULL) {
+      list->head_places = newnode;
+      list->tail_places = newnode;
+    } else {
+      list->tail_places->next = newnode;
+      list->tail_places = newnode;
+    }
+    list->size_places++;
+  }
+  fclose(fp);
+  return list->size_places;
+}
+
+int find_node(list_map *list, char *street, int stype) {
+
+  node *curr = NULL;
+  int size = 0;
+  if (stype == HOUSES) {
+    curr = list->head_houses;
+    size = list->size_houses;
+  } else if (stype == PLACES) {
+    curr = list->head_places;
+    size = list->size_places;
+  }
+
+  node *best_match = NULL; // init best match
   int best_dist = 7;
   int threshold = 7;
   int street_found = 0;
   int chosen_num;
   char choice;
 
+  int num;
+
+  if (stype == HOUSES) {
+    printf("Enter street number (e.g. '138'): \n");
+    scanf("%d", &num);
+  }
   // convert to lower
   for (int i = 0; i < (int)strlen(street); i++) {
     street[i] = tolower(street[i]);
   }
   printf("Street to lower: %s.\n", street); // DEBUG
-
-  for (int i = 0; i < house_list->size; i++) {
+  for (int i = 0; i < size; i++) {
+    // printf("checking input to: %s.\n", curr->name); // DEBUG
 
     // compare exact match
-    if (strcmp(curr->street, street) == 0) {
+    if (strcmp(curr->name, street) == 0) {
       street_found = 1;
-      if (curr->num == num) {
+      // printf("Street's current NUM: %d.\n", curr->house->num); // DEBUG
+
+      if (stype == HOUSES && curr->house->num == num) {
+        printf("Found at %lf | %lf\n", curr->lat, curr->lon);
+        return 1;
+      } else if (stype != HOUSES) {
         printf("Found at %lf | %lf\n", curr->lat, curr->lon);
         return 1;
       }
     }
     // compare using distance to find most similar one
     else {
-      int dist = LevenshteinDistance(curr->street, street);
+      int dist = LevenshteinDistance(curr->name, street);
       // printf("dist calculated is: %i\n", dist); //DEBUG
       if (dist < best_dist) {
         best_dist = dist;
@@ -139,14 +179,14 @@ int find_address(list *house_list, char *street, int num) {
     curr = curr->next;
   }
 
-  if (street_found) {
+  if (street_found && stype == HOUSES) {
     printf("We found the street, but number %d is not valid.\n", num);
     printf("Valid numbers in %s: ", street);
 
-    curr = house_list->head;
+    curr = list->head_houses;
     while (curr != NULL) {
-      if (strcmp(curr->street, street) == 0) {
-        printf("%d ", curr->num);
+      if (strcmp(curr->name, street) == 0) {
+        printf("%d ", curr->house->num);
       }
       curr = curr->next;
     }
@@ -155,9 +195,9 @@ int find_address(list *house_list, char *street, int num) {
     printf("Choose one of these numbers: ");
     scanf("%d", &chosen_num);
 
-    curr = house_list->head;
+    curr = list->head_houses;
     while (curr != NULL) {
-      if (strcmp(curr->street, street) == 0 && curr->num == chosen_num) {
+      if (strcmp(curr->name, street) == 0 && curr->house->num == chosen_num) {
         printf("Found at %lf | %lf\n", curr->lat, curr->lon);
         return 1;
       }
@@ -169,8 +209,8 @@ int find_address(list *house_list, char *street, int num) {
   }
 
   if (best_dist < threshold && best_match != NULL) {
-    printf("We couldn't find the address, did you mean: %s %d [Y-N]\n",
-           best_match->street, best_match->num);
+    printf("We couldn't find the address, did you mean: %s [Y-N]\n",
+           best_match->name);
     // TODO LevenshteinDistance for the address number
     scanf(" %c", &choice);
 
@@ -178,11 +218,11 @@ int find_address(list *house_list, char *street, int num) {
       printf("Found at %lf | %lf\n", best_match->lat, best_match->lon);
       return 1;
     } else {
-      printf("We couldn't find your address\n");
+      printf("We couldn't find your location!\n");
       return -1;
     }
   }
-  printf("We couldn't find your address\n");
+  printf("We couldn't find your location!\n");
   return -1;
 }
 
