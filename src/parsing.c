@@ -5,12 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+//builds the houses linked list, allocating, assigning variables, and linking each node
 int load_houses(list_map *list) {
   // create route
   char route[256] = "maps/";
   strcat(route, list->map);
   strcat(route, "/houses.txt");
-  printf("Current route: %s\n", route); // DEBUG
+  //printf("Current route: %s\n", route); // DEBUG
 
   // open file
   FILE *fp = fopen(route, "r");
@@ -61,6 +62,7 @@ int load_houses(list_map *list) {
   return list->size_houses;
 }
 
+//builds the places linked list, allocating, assigning variables, and linking each node
 int load_places(list_map *list) {
 
   char route[256] = "maps/";
@@ -137,10 +139,9 @@ int find_node(list_map *list, char *street, int stype) {
   int best_dist = 7;
   int threshold = 7;
   int street_found = 0;
-  int chosen_num;
+  int chosen_num = -1;
   char choice;
-
-  int num;
+  int num = -1;
 
   if (stype == HOUSES) {
     printf("Enter street number (e.g. '138'): \n");
@@ -150,7 +151,7 @@ int find_node(list_map *list, char *street, int stype) {
   for (int i = 0; i < (int)strlen(street); i++) {
     street[i] = tolower(street[i]);
   }
-  printf("Street to lower: %s.\n", street); // DEBUG
+  //printf("Street to lower: %s.\n", street); // DEBUG
   for (int i = 0; i < size; i++) {
     // printf("checking input to: %s.\n", curr->name); // DEBUG
 

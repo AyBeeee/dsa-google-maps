@@ -21,16 +21,21 @@ void free_map(list_map *list) {
   // TODO add for streets eventually
 }
 
+void init_list(list_map *list)
+{
+    list->head_houses = NULL;
+    list->tail_houses = NULL;
+    list->size_houses = 0;
+
+    list->head_places = NULL;
+    list->tail_places = NULL;
+    list->size_places = 0;
+}
+
 void ask_map() {
 
   list_map list;
-  list.head_houses = NULL;
-  list.tail_houses = NULL;
-  list.size_houses = 0;
-
-  list.head_places = NULL;
-  list.tail_places = NULL;
-  list.size_places = 0;
+  init_list(&list);
 
   printf("Enter map name (e.g. 'xs_2' or 'xl_1'): ");
   scanf("%s", list.map);
@@ -65,7 +70,9 @@ void ask_address(list_map *list) { // pass the malloc from ask_map
   printf("Where are you? Address (1), Place (2) or Coordinate (3)?\n");
   scanf("%d", &option);
 
-  if (option == 1) {
+  if (option != 1 && option != 2 && option != 3)
+      printf("Wrong input!\n");
+  else if (option == 1) {
 
     char street[50];
 
