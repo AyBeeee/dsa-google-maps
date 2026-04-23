@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-//builds the houses linked list, allocating, assigning variables, and linking each node
+// builds the houses linked list, allocating, assigning variables, and linking
+// each node
 int load_houses(list_map *list) {
   // create route
   char route[256] = "maps/";
@@ -62,7 +63,8 @@ int load_houses(list_map *list) {
   return list->size_houses;
 }
 
-//builds the places linked list, allocating, assigning variables, and linking each node
+// builds the places linked list, allocating, assigning variables, and linking
+// each node
 int load_places(list_map *list) {
 
   char route[256] = "maps/";
@@ -125,11 +127,11 @@ int load_places(list_map *list) {
 
 int load_streets(list_map *list) {
   char route[256] = "maps/";
-    strcat(route, list->map);
-    strcat(route, "/streets.txt");
-    printf("Current route: %s\n", route);
-  
-    // open file
+  strcat(route, list->map);
+  strcat(route, "/streets.txt");
+  printf("Current route: %s\n", route);
+
+  // open file
   FILE *fp = fopen(route, "r");
 
   if (fp == NULL) {
@@ -139,8 +141,8 @@ int load_streets(list_map *list) {
 
   // load list
   char line[256];
-  while(fgets(line, sizeof(line), fp)) {
-    
+  while (fgets(line, sizeof(line), fp)) {
+
     node *newnode = malloc(sizeof(node));
     if (newnode == NULL) {
       fclose(fp);
@@ -157,26 +159,27 @@ int load_streets(list_map *list) {
       return -1;
     }
 
-    sscanf(line, "%d, %lf, %lf, %d, %lf, %lf, %d, %49[^,]", &newnode->street->from_intersaction_id, 
-                          &newnode->street->from_intersection_lat, 
-                          &newnode->street->from_intersection_lon,
-                          &newnode->street->to_intersection_id,
-                          &newnode->street->to_intersection_lat,
-                          &newnode->street->to_intersection_lon,
-                          &newnode->street->length_meters,
-                          newnode->street->street_name);
+    sscanf(line, "%d, %lf, %lf, %d, %lf, %lf, %d, %49[^,]",
+           &newnode->street->from_intersaction_id,
+           &newnode->street->from_intersection_lat,
+           &newnode->street->from_intersection_lon,
+           &newnode->street->to_intersection_id,
+           &newnode->street->to_intersection_lat,
+           &newnode->street->to_intersection_lon,
+           &newnode->street->length_meters, newnode->street->street_name);
 
     for (int i = 0; i < (int)strlen(newnode->street->street_name); i++) {
-      newnode->street->street_name[i] = tolower(newnode->street->street_name[i]);
+      newnode->street->street_name[i] =
+          tolower(newnode->street->street_name[i]);
     }
 
     newnode->next = NULL;
 
-    if(list->head_streets == NULL) {
+    if (list->head_streets == NULL) {
       list->head_streets = newnode;
       list->tail_streets = newnode;
     }
-    if(list->tail_streets != NULL) {
+    if (list->tail_streets != NULL) {
       list->tail_streets->next = newnode;
       list->tail_streets = newnode;
     }
@@ -214,7 +217,7 @@ int find_node(list_map *list, char *street, int stype) {
   for (int i = 0; i < (int)strlen(street); i++) {
     street[i] = tolower(street[i]);
   }
-  //printf("Street to lower: %s.\n", street); // DEBUG
+  // printf("Street to lower: %s.\n", street); // DEBUG
   for (int i = 0; i < size; i++) {
     // printf("checking input to: %s.\n", curr->name); // DEBUG
 
