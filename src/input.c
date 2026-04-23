@@ -18,7 +18,12 @@ void free_map(list_map *list) {
     free(list->head_places);
     list->head_places = temp;
   }
-  // TODO add for streets eventually
+  while (list->head_streets) {
+    temp = list->head_streets->next;
+    free(list->head_streets->street);
+    free(list->head_streets);
+    list->head_streets = temp;
+  }
 }
 
 void init_list(list_map *list)
@@ -30,6 +35,10 @@ void init_list(list_map *list)
     list->head_places = NULL;
     list->tail_places = NULL;
     list->size_places = 0;
+
+    list->head_streets = NULL;
+    list->tail_streets = NULL;
+    list->size_streets = 0;
 }
 
 void ask_map() {
@@ -46,14 +55,16 @@ void ask_map() {
 
     int loaded_houses = load_houses(&list);
     int loaded_places = load_places(&list);
+    int loaded_streets = load_streets(&list);
 
-    if (loaded_houses == -1 || loaded_places == -1) {
+    if (loaded_houses == -1 || loaded_places == -1 || loaded_streets == -1) {
       printf("No list loaded\n");
       return;
     }
 
     printf("Houses loaded: %d\n", loaded_houses);
-    printf("Places loaded: %d\n", loaded_houses);
+    printf("Places loaded: %d\n", loaded_places);
+    printf("Streets loaded: %d\n", loaded_streets);
     ask_address(&list);
   }
 

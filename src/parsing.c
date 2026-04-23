@@ -11,7 +11,7 @@ int load_houses(list_map *list) {
   char route[256] = "maps/";
   strcat(route, list->map);
   strcat(route, "/houses.txt");
-  //printf("Current route: %s\n", route); // DEBUG
+  printf("Current route: %s\n", route); // DEBUG
 
   // open file
   FILE *fp = fopen(route, "r");
@@ -121,6 +121,69 @@ int load_places(list_map *list) {
   }
   fclose(fp);
   return list->size_places;
+}
+
+int load_streets(list_map *list) {
+  char route[256] = "maps/";
+    strcat(route, list->map);
+    strcat(route, "/streets.txt");
+    printf("Current route: %s\n", route);
+  
+    // open file
+  FILE *fp = fopen(route, "r");
+
+  if (fp == NULL) {
+    printf("Couldn't find the file/or it is empty\n");
+    return -1;
+  }
+
+  // load list
+  char line[256];
+  while(fgets(line, sizeof(line), fp)) {
+    
+    node *newnode = malloc(sizeof(node));
+    if (newnode == NULL) {
+      fclose(fp);
+      return -1;
+    }
+
+    newnode->street = malloc(sizeof(data_streets));
+    newnode->house = NULL;
+    newnode->place = NULL;
+
+    if (newnode->street == NULL) {
+      fclose(fp);
+      free(newnode);
+      return -1;
+    }
+
+    sscanf(line, "%d, %lf, %lf, %d, %lf, %lf, %d, %49[^,]", &newnode->street->from_intersaction_id, 
+                          &newnode->street->from_intersection_lat, 
+                          &newnode->street->from_intersection_lon,
+                          &newnode->street->to_intersection_id,
+                          &newnode->street->to_intersection_lat,
+                          &newnode->street->to_intersection_lon,
+                          &newnode->street->length_meters,
+                          newnode->street->street_name);
+
+    for (int i = 0; i < (int)strlen(newnode->street->street_name); i++) {
+      newnode->street->street_name[i] = tolower(newnode->street->street_name[i]);
+    }
+
+    newnode->next = NULL;
+
+    if(list->head_streets == NULL) {
+      list->head_streets = newnode;
+      list->tail_streets = newnode;
+    }
+    if(list->tail_streets != NULL) {
+      list->tail_streets->next = newnode;
+      list->tail_streets = newnode;
+    }
+    list->size_streets++;
+  }
+  fclose(fp);
+  return list->size_streets;
 }
 
 int find_node(list_map *list, char *street, int stype) {
