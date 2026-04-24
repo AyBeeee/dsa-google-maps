@@ -247,7 +247,7 @@ int find_node(list_map *list, char *street, int stype) {
     }
     curr = curr->next;
   }
-  
+
   if (best_dist < threshold && best_match != NULL) {
     printf("We couldn't find the address, did you mean: %s [Y-N]\n",
            best_match->name);
@@ -296,7 +296,8 @@ int find_node(list_map *list, char *street, int stype) {
       scanf(" %c", &choice);
 
       if (choice == 'Y') {
-        printf("Found at %lf | %lf\n", best_num_match->lat, best_num_match->lon);
+        printf("Found at %lf | %lf\n", best_num_match->lat,
+               best_num_match->lon);
         return 1;
       }
     }
