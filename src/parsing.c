@@ -1,5 +1,6 @@
 #include "parsing.h"
 #include <ctype.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -205,7 +206,7 @@ int find_node(list_map *list, char *street, int stype) {
   int best_dist = 7;
   int threshold = 7;
   int street_found = 0;
-  int chosen_num = -1;
+  char *matched_street = street;
   char choice;
   int num = -1;
 
@@ -224,6 +225,7 @@ int find_node(list_map *list, char *street, int stype) {
     // compare exact match
     if (strcmp(curr->name, street) == 0) {
       street_found = 1;
+      matched_street = curr->name;
       // printf("Street's current NUM: %d.\n", curr->house->num); // DEBUG
 
       if (stype == HOUSES && curr->house->num == num) {
@@ -245,49 +247,62 @@ int find_node(list_map *list, char *street, int stype) {
     }
     curr = curr->next;
   }
+  
+  if (best_dist < threshold && best_match != NULL) {
+    printf("We couldn't find the address, did you mean: %s [Y-N]\n",
+           best_match->name);
+    scanf(" %c", &choice);
+
+    if (choice == 'Y') {
+      street_found = 1;
+      matched_street = best_match->name;
+    } else {
+      printf("We couldn't find your location!\n");
+      return -1;
+    }
+  }
 
   if (street_found && stype == HOUSES) {
+    char num_str[16];
+    char candidate_str[16];
+    int best_num_dist = INT_MAX;
+    node *best_num_match = NULL;
+
     printf("We found the street, but number %d is not valid.\n", num);
-    printf("Valid numbers in %s: ", street);
+    printf("Valid numbers in %s: ", matched_street);
+
+    snprintf(num_str, sizeof(num_str), "%d", num);
 
     curr = list->head_houses;
     while (curr != NULL) {
-      if (strcmp(curr->name, street) == 0) {
+      if (strcmp(curr->name, matched_street) == 0) {
+        int dist;
+
         printf("%d ", curr->house->num);
+        snprintf(candidate_str, sizeof(candidate_str), "%d", curr->house->num);
+        dist = LevenshteinDistance(candidate_str, num_str);
+
+        if (dist < best_num_dist) {
+          best_num_dist = dist;
+          best_num_match = curr;
+        }
       }
       curr = curr->next;
     }
     printf("\n");
 
-    printf("Choose one of these numbers: ");
-    scanf("%d", &chosen_num);
+    if (best_num_match != NULL) {
+      printf("Did you mean number %d? [Y-N]\n", best_num_match->house->num);
+      scanf(" %c", &choice);
 
-    curr = list->head_houses;
-    while (curr != NULL) {
-      if (strcmp(curr->name, street) == 0 && curr->house->num == chosen_num) {
-        printf("Found at %lf | %lf\n", curr->lat, curr->lon);
+      if (choice == 'Y') {
+        printf("Found at %lf | %lf\n", best_num_match->lat, best_num_match->lon);
         return 1;
       }
-      curr = curr->next;
     }
 
     printf("That number is not valid for this street\n");
     return -1;
-  }
-
-  if (best_dist < threshold && best_match != NULL) {
-    printf("We couldn't find the address, did you mean: %s [Y-N]\n",
-           best_match->name);
-    // TODO LevenshteinDistance for the address number
-    scanf(" %c", &choice);
-
-    if (choice == 'Y') {
-      printf("Found at %lf | %lf\n", best_match->lat, best_match->lon);
-      return 1;
-    } else {
-      printf("We couldn't find your location!\n");
-      return -1;
-    }
   }
   printf("We couldn't find your location!\n");
   return -1;
