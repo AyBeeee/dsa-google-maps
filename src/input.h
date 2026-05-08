@@ -1,6 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 #include <stdlib.h>
+#define TABLE_SIZE 1000
 
 enum type { HOUSES, PLACES };
 
@@ -14,7 +15,7 @@ typedef struct data_places {
 } data_places;
 
 typedef struct data_streets {
-  int from_intersaction_id;
+  int from_intersection_id;
   double from_intersection_lat, from_intersection_lon;
   int to_intersection_id;
   double to_intersection_lat, to_intersection_lon;
@@ -29,7 +30,7 @@ typedef struct node {
   struct data_houses *house;
   struct data_places *place;
   struct data_streets *street;
-  // struct data_streets *street;
+  // struct dataw_streets *street;
 } node;
 
 typedef struct {
@@ -48,5 +49,15 @@ typedef struct {
   int size_streets;
 
 } list_map;
+
+typedef struct hashmap_entry {
+  int intersection_id;
+  node *connected_streets;
+  struct hashmap_entry *next;
+} hashmap_entry;
+
+typedef struct hashmap {
+  hashmap_entry *table[TABLE_SIZE];
+} hashmap;
 
 #endif

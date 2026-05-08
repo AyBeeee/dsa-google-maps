@@ -161,7 +161,7 @@ int load_streets(list_map *list) {
     }
 
     sscanf(line, "%d, %lf, %lf, %d, %lf, %lf, %d, %49[^,]",
-           &newnode->street->from_intersaction_id,
+           &newnode->street->from_intersection_id,
            &newnode->street->from_intersection_lat,
            &newnode->street->from_intersection_lon,
            &newnode->street->to_intersection_id,
@@ -347,4 +347,93 @@ int LevenshteinDistance(char *a, char *b) {
     }
   }
   return matrix[la][lb];
+}
+
+int hash_intersection(int intersection_id) {
+  return intersection_id % TABLE_SIZE;
+}
+
+hashmap *create_hashmap() {
+
+  hashmap *graph = malloc(sizeof(hashmap));
+
+  for (int i = 0; i < TABLE_SIZE; i++) {
+    graph->table[i] = NULL;
+  }
+
+  return graph;
+}
+
+hashmap_entry *find_intersection(hashmap *graph, int intersection_id) {
+  int index = hash_intersection(intersection_id);
+
+  hashmap_entry *current = graph->table[index];
+
+  while (current != NULL) {
+    if (current->intersection_id == intersection_id) {
+      return current;
+    }
+
+    current = current->next;
+  }
+
+  return NULL;
+}
+
+void add_street_to_intersection(hashmap *graph, int intersection_id,
+                                data_streets *street) {
+  int index = hash_intersection(intersection_id);
+
+  hashmap_entry *entry = find_intersection(graph, intersection_id);
+
+  if (entry == NULL) {
+    entry = malloc(sizeof(hashmap_entry));
+
+    entry->intersection_id = intersection_id;
+    entry->connected_streets = NULL;
+
+    entry->next = graph->table[index];
+    graph->table[index] = entry;
+  }
+
+  node *new_node = malloc(sizeof(node));
+
+  new_node->street = street;
+  new_node->house = NULL;
+  new_node->place = NULL;
+  new_node->next = entry->connected_streets;
+
+  entry->connected_streets = new_node;
+}
+
+void load_streets_into_graph(hashmap *graph, data_streets streets[],
+                             int number_of_streets) {
+  for (int i = 0; i < number_of_streets; i++) {
+    data_streets *street = &streets[i];
+
+    add_street_to_intersection(graph, street->from_intersection_id, street);
+    add_street_to_intersection(graph, street->to_intersection_id, street);
+  }
+}
+
+node *get_connected_streets(hashmap *graph, int intersection_id) {
+  hashmap_entry *entry = find_intersection(graph, intersection_id);
+
+  if (entry == NULL) {
+    return NULL;
+  }
+
+  return entry->connected_streets;
+}
+
+void print_connected_streets(hashmap *graph, int intersection_id) {
+  node *current = get_connected_streets(graph, intersection_id);
+
+  printf("Intersection %d is connected to:\n", intersection_id);
+
+  while (current != NULL) {
+    printf("- %s, length: %d meters\n", current->street->street_name,
+           current->street->length_meters);
+    current = current->next;
+  }
 }
