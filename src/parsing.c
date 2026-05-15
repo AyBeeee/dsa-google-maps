@@ -160,14 +160,15 @@ int load_streets(list_map *list) {
       return -1;
     }
 
-    sscanf(line, "%d, %lf, %lf, %d, %lf, %lf, %d, %49[^,]",
+    sscanf(line, "%d, %lf, %lf, %d, %lf, %lf, %lf, %49[^\n]",
            &newnode->street->from_intersection_id,
            &newnode->street->from_intersection_lat,
            &newnode->street->from_intersection_lon,
            &newnode->street->to_intersection_id,
            &newnode->street->to_intersection_lat,
            &newnode->street->to_intersection_lon,
-           &newnode->street->length_meters, newnode->street->street_name);
+           &newnode->street->length_meters,
+           newnode->street->street_name);
 
     for (int i = 0; i < (int)strlen(newnode->street->street_name); i++) {
       newnode->street->street_name[i] =
@@ -188,6 +189,13 @@ int load_streets(list_map *list) {
   }
   fclose(fp);
   return list->size_streets;
+}
+
+int find_coordinate(list_map *list, double x_target, double y_target)
+{
+    (void)list;
+    printf("input coordinates: %lf %lf\n", x_target, y_target);
+    return (0);
 }
 
 int find_node(list_map *list, char *street, int stype) {
@@ -432,7 +440,7 @@ void print_connected_streets(hashmap *graph, int intersection_id) {
   printf("Intersection %d is connected to:\n", intersection_id);
 
   while (current != NULL) {
-    printf("- %s, length: %d meters\n", current->street->street_name,
+    printf("- %s, length: %lf meters\n", current->street->street_name,
            current->street->length_meters);
     current = current->next;
   }

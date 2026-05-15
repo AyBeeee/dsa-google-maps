@@ -7,6 +7,8 @@ int load_houses(list_map *l);
 int load_places(list_map *l);
 int load_streets(list_map *l);
 int find_node(list_map *list, char *street, int stype);
+int find_coordinate(list_map *list, double x_target, double y_target);
+
 int LevenshteinDistance(char *a, char *b);
 int hash_intersection(int intersection_id);
 
