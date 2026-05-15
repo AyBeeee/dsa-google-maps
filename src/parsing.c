@@ -434,7 +434,10 @@ void load_streets_into_graph(hashmap *graph, data_streets streets[], int number_
 
 // find connected street in a bucket
 node *get_connected_streets(hashmap *graph, int intersection_id) {
-  hashmap_entry *entry = find_intersection(graph, intersection_id);
+  
+  int index = hash_intersection(intersection_id); // find index bucket
+
+  hashmap_entry *entry = find_intersection(graph, intersection_id, index);
 
   if (entry == NULL) {
     return NULL;
