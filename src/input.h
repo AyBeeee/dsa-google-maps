@@ -31,7 +31,6 @@ typedef struct node {
   struct data_houses *house;
   struct data_places *place;
   struct data_streets *street;
-  // struct dataw_streets *street;
 } node;
 
 typedef struct {
@@ -52,7 +51,7 @@ typedef struct {
 } list_map;
 
 typedef struct hashmap_entry {
-  int intersection_id;
+  long long intersection_id;
   node *connected_streets;
   struct hashmap_entry *next;
 } hashmap_entry;

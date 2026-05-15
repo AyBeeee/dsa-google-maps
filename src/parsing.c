@@ -234,21 +234,10 @@ int load_streets(list_map *list) {
            &newnode->street->to_intersection_lon,
            &newnode->street->length_meters,
            newnode->name);
-    printf("just parsed this shit %lli, %lf, %lf, %lli, %lf, %lf, %lf, %s\n",
-           newnode->street->from_intersection_id,
-           newnode->street->from_intersection_lat,
-           newnode->street->from_intersection_lon,
-           newnode->street->to_intersection_id,
-           newnode->street->to_intersection_lat,
-           newnode->street->to_intersection_lon,
-           newnode->street->length_meters,
-           newnode->name);
 
     for (int i = 0; i < (int)strlen(newnode->name); i++) {
-      newnode->name[i] =
-          tolower(newnode->name[i]);
+      newnode->name[i] = tolower(newnode->name[i]);
     }
-
     midpoint(newnode);
     //printf("midpoint x%f y%f\n", newnode->street->midX, newnode->street->midY); //DEBUG
 
@@ -258,12 +247,13 @@ int load_streets(list_map *list) {
       list->head_streets = newnode;
       list->tail_streets = newnode;
     }
-    if (list->tail_streets != NULL) {
+    else {
       list->tail_streets->next = newnode;
       list->tail_streets = newnode;
     }
     list->size_streets++;
   }
+
   fclose(fp);
   return list->size_streets;
 }
@@ -305,8 +295,6 @@ int find_coordinate(list_map *list, double x_target, double y_target)
         best_match->street->from_intersection_lon, best_match->street->to_intersection_id,
         best_match->street->to_intersection_lat, best_match->street->to_intersection_lon);
 
-
-
     return (0);
 }
 
@@ -334,10 +322,12 @@ int find_node(list_map *list, char *street, int stype) {
     printf("Enter street number (e.g. '138'): \n");
     scanf("%d", &num);
   }
+
   // convert to lower
   for (int i = 0; i < (int)strlen(street); i++) {
     street[i] = tolower(street[i]);
   }
+
   // printf("Street to lower: %s.\n", street); // DEBUG
   for (int i = 0; i < size; i++) {
     // printf("checking input to: %s.\n", curr->name); // DEBUG
@@ -356,6 +346,7 @@ int find_node(list_map *list, char *street, int stype) {
         return 1;
       }
     }
+
     // compare using distance to find most similar one
     else {
       int dist = LevenshteinDistance(curr->name, street);
@@ -415,7 +406,7 @@ int find_node(list_map *list, char *street, int stype) {
       printf("Did you mean number %d? [Y-N]\n", best_num_match->house->num);
       scanf(" %c", &choice);
 
-      if (choice == 'Y') {
+      if (choice == 'Y' || choice == 'y') {
         printf("Found at %lf | %lf\n", best_num_match->lat,
                best_num_match->lon);
         return 1;
@@ -469,9 +460,12 @@ int LevenshteinDistance(char *a, char *b) {
   return matrix[la][lb];
 }
 
+
+// ################# HASH RELATED FUNCTIONS ###############
+
 // hash function
-int hash_intersection(int intersection_id) {
-  return intersection_id % TABLE_SIZE;
+int hash_intersection(long long intersection_id) {
+  return (int)(intersection_id % TABLE_SIZE);
 }
 
 // initialize hashmap with buckets as NULL
@@ -487,26 +481,26 @@ hashmap *create_hashmap() {
 }
 
 // Find existing intersection in a bucket by going through the list
-hashmap_entry *find_intersection(hashmap *graph, int intersection_id, int index) {
 
-  hashmap_entry *current = graph->table[index];
+hashmap_entry *find_intersection(hashmap *graph, long long intersection_id, int index) {
+
+  hashmap_entry *current = graph->table[index]; // current element in the bucket, starting at the first one
 
   while (current != NULL) {
     if (current->intersection_id == intersection_id) {
       return current; // return bucket where intersection was found
     }
-
     current = current->next;
   }
 
   return NULL;
 }
 
-void add_street_to_intersection(hashmap *graph, int intersection_id, data_streets *street) {
+void add_street_to_intersection(hashmap *graph, long long intersection_id, node *curr) {
 
   int index = hash_intersection(intersection_id); // find index bucket
 
-  hashmap_entry *entry = find_intersection(graph, intersection_id, index); // find where the
+  hashmap_entry *entry = find_intersection(graph, intersection_id, index); // find a street in the hashmap with the same intersection id
 
   // if the bucket is null, create the bucket
   if (entry == NULL) {
@@ -514,15 +508,17 @@ void add_street_to_intersection(hashmap *graph, int intersection_id, data_street
 
     entry->intersection_id = intersection_id;
     entry->connected_streets = NULL;
-
     entry->next = graph->table[index];
     graph->table[index] = entry;
   }
 
-  // add the new node to the bucket
+  // if the bucket is not null, add the new node connected to the element in the bucket since the streets will be connected
   node *new_node = malloc(sizeof(node));
 
-  new_node->street = street;
+  strcpy(new_node->name, curr->name);
+  new_node->street = curr->street;
+  new_node->lat = curr->lat;
+  new_node->lon = curr->lon;
   new_node->house = NULL;
   new_node->place = NULL;
   new_node->next = entry->connected_streets;
@@ -531,18 +527,22 @@ void add_street_to_intersection(hashmap *graph, int intersection_id, data_street
 }
 
 // Load streets into the hashmap
-void load_streets_into_graph(hashmap *graph, data_streets streets[], int number_of_streets) {
 
-  for (int i = 0; i < number_of_streets; i++) {
-    data_streets *street = &streets[i];
+void load_streets_into_graph(hashmap *graph, node *head_streets) {
 
-    add_street_to_intersection(graph, street->from_intersection_id, street);
-    add_street_to_intersection(graph, street->to_intersection_id, street);
+  node *curr = head_streets;
+
+  while (curr != NULL) {
+
+    add_street_to_intersection(graph, curr->street->from_intersection_id, curr);
+    add_street_to_intersection(graph, curr->street->to_intersection_id, curr);
+    //printf("Loaded %s\n", curr->name); DEBUG LOADING IN HASH MAP
+    curr = curr->next;
   }
 }
 
 // find connected street in a bucket
-node *get_connected_streets(hashmap *graph, int intersection_id) {
+node *get_connected_streets(hashmap *graph, long long intersection_id) {
 
   int index = hash_intersection(intersection_id); // find index bucket
 
@@ -555,10 +555,11 @@ node *get_connected_streets(hashmap *graph, int intersection_id) {
   return entry->connected_streets;
 }
 
-void print_connected_streets(hashmap *graph, int intersection_id) {
+// print connected streets in a bucket
+void print_connected_streets(hashmap *graph, long long intersection_id) {
   node *current = get_connected_streets(graph, intersection_id);
 
-  printf("Intersection %d is connected to:\n", intersection_id);
+  printf("Intersection %lld is connected to:\n", intersection_id);
 
   while (current != NULL) {
     printf("- %s, length: %lf meters\n", current->name,
