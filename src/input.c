@@ -104,6 +104,13 @@ void ask_address(list_map *list) { // pass the malloc from ask_map
   }
 
   else {
-    printf("Not implemented yet\n");
+    double x_coord, y_coord;
+
+    printf("Enter X Coordinate (e.g. '41.4134202'):\n");
+    scanf(" %lf", &x_coord);
+    printf("Enter Y Coordinate (e.g. '2.1886874'):\n");
+    scanf(" %lf", &y_coord);
+
+    find_coordinate(list, x_coord, y_coord);
   }
 }

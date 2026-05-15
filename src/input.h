@@ -19,7 +19,7 @@ typedef struct data_streets {
   double from_intersection_lat, from_intersection_lon;
   int to_intersection_id;
   double to_intersection_lat, to_intersection_lon;
-  int length_meters;
+  double length_meters;
   char street_name[50];
 } data_streets;
 
