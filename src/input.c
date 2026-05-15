@@ -8,18 +8,21 @@ void free_map(list_map *list) {
   node *temp;
   while (list->head_houses) {
     temp = list->head_houses->next;
+    free(list->head_houses->name);
     free(list->head_houses->house);
     free(list->head_houses);
     list->head_houses = temp;
   }
   while (list->head_places) {
     temp = list->head_places->next;
+    free(list->head_places->name);
     free(list->head_places->place);
     free(list->head_places);
     list->head_places = temp;
   }
   while (list->head_streets) {
     temp = list->head_streets->next;
+    free(list->head_streets->name);
     free(list->head_streets->street);
     free(list->head_streets);
     list->head_streets = temp;

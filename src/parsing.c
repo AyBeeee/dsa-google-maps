@@ -5,6 +5,62 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+
+
+//TODO esto todo en utils.c
+//
+double toDegrees(double radians) {
+    return radians * (180.0 / M_PI);
+}
+
+double toRadians(double degree) {
+    return degree * (M_PI / 180.0);
+}
+
+void midpoint(node *newnode) {
+    double lat1 = toRadians(newnode->street->from_intersection_lat);
+    double lon1 = toRadians(newnode->street->from_intersection_lon);
+    double lat2 = toRadians(newnode->street->to_intersection_lat);
+    double lon2 = toRadians(newnode->street->to_intersection_lon);
+
+    double x1 = cos(lat1) * cos(lon1);
+    double y1 = cos(lat1) * sin(lon1);
+    double z1 = sin(lat1);
+
+    double x2 = cos(lat2) * cos(lon2);
+    double y2 = cos(lat2) * sin(lon2);
+    double z2 = sin(lat2);
+
+    double x = (x1 + x2) / 2.0;
+    double y = (y1 + y2) / 2.0;
+    double z = (z1 + z2) / 2.0;
+
+    double lon = atan2(y, x);
+    double hyp = sqrt(x * x + y * y);
+    double lat = atan2(z, hyp);
+
+    newnode->street->midX = toDegrees(lat);
+    newnode->street->midY = toDegrees(lon);
+}
+
+int findnchar(char *str, char c, int n)
+{
+    if (!str)
+        return -1;
+    if (n <= 0)
+        return 0;
+    int i = 0;
+    for (i = i; str[i] && n > 0; i++)
+    {
+        if (str[i] == c)
+            n--;
+    }
+    if (!str[i] || n != 0)
+        return -1;
+    return i;
+}
+
 
 // builds the houses linked list, allocating, assigning variables, and linking
 // each node
@@ -43,6 +99,8 @@ int load_houses(list_map *list) {
       return -1;
     }
 
+    //calloc between beginning of string and first comma
+    newnode->name = calloc(findnchar(line, ',', 1) - findnchar(line, ',', 0) + 1, sizeof(char));
     sscanf(line, "%49[^,],%d,%lf,%lf", newnode->name, &(newnode->house->num),
            &newnode->lat, &newnode->lon);
 
@@ -103,6 +161,8 @@ int load_places(list_map *list) {
       return -1;
     }
 
+    //calloc for length of name string (in this case between second and first comma characters)
+    newnode->name = calloc(findnchar(line, ',', 2) - findnchar(line, ',', 1) + 1, sizeof(char));
     sscanf(line, "%49[^,],%49[^,],%49[^,],%lf,%lf", newnode->place->id,
            newnode->name, newnode->place->amenity, &newnode->lat,
            &newnode->lon);
@@ -163,7 +223,9 @@ int load_streets(list_map *list) {
       return -1;
     }
 
-    sscanf(line, "%d, %lf, %lf, %d, %lf, %lf, %lf, %49[^\n]",
+    //calloc between the end of the line and seventh comma
+    newnode->name = calloc(strlen(line) - findnchar(line, ',', 7) + 1, sizeof(char));
+    sscanf(line, "%lli, %lf, %lf, %lli, %lf, %lf, %lf, %49[^\n]",
            &newnode->street->from_intersection_id,
            &newnode->street->from_intersection_lat,
            &newnode->street->from_intersection_lon,
@@ -171,12 +233,24 @@ int load_streets(list_map *list) {
            &newnode->street->to_intersection_lat,
            &newnode->street->to_intersection_lon,
            &newnode->street->length_meters,
-           newnode->street->street_name);
+           newnode->name);
+    printf("just parsed this shit %lli, %lf, %lf, %lli, %lf, %lf, %lf, %s\n",
+           newnode->street->from_intersection_id,
+           newnode->street->from_intersection_lat,
+           newnode->street->from_intersection_lon,
+           newnode->street->to_intersection_id,
+           newnode->street->to_intersection_lat,
+           newnode->street->to_intersection_lon,
+           newnode->street->length_meters,
+           newnode->name);
 
-    for (int i = 0; i < (int)strlen(newnode->street->street_name); i++) {
-      newnode->street->street_name[i] =
-          tolower(newnode->street->street_name[i]);
+    for (int i = 0; i < (int)strlen(newnode->name); i++) {
+      newnode->name[i] =
+          tolower(newnode->name[i]);
     }
+
+    midpoint(newnode);
+    //printf("midpoint x%f y%f\n", newnode->street->midX, newnode->street->midY); //DEBUG
 
     newnode->next = NULL;
 
@@ -196,8 +270,43 @@ int load_streets(list_map *list) {
 
 int find_coordinate(list_map *list, double x_target, double y_target)
 {
-    (void)list;
-    printf("input coordinates: %lf %lf\n", x_target, y_target);
+    //convert the input coordinates into strings for the laveshtein distance stuff
+    char s_xtarget[16];
+    char s_ytarget[16];
+    snprintf(s_xtarget, sizeof(s_xtarget), "%f", x_target);
+    snprintf(s_ytarget, sizeof(s_ytarget), "%f", y_target);
+
+    node *curr = list->head_streets;
+    node *best_match = NULL;
+    int best_dist = 999;
+    for (int i = 0; i < list->size_streets; i++)
+    {
+        char s_xmidpoint[16];
+        char s_ymidpoint[16];
+        snprintf(s_xmidpoint, sizeof(s_xmidpoint), "%f", curr->street->midX);
+        snprintf(s_ymidpoint, sizeof(s_ymidpoint), "%f", curr->street->midY);
+
+        int xDist = LevenshteinDistance(s_xmidpoint, s_xtarget);
+        int yDist = LevenshteinDistance(s_xmidpoint, s_xtarget);
+
+        // printf("dist calculated is: %i\n", dist); //DEBUG
+        if (xDist + yDist < best_dist) {
+          best_dist = xDist + yDist;
+          best_match = curr;
+        }
+        printf("distances: %i + %i = %i\n", xDist, yDist, xDist + yDist);
+        curr = curr->next;
+    }
+
+    printf("Your coordinates: %f, %f\n", x_target, y_target);
+    printf("Closest street to you: %s\n", best_match->name);
+    printf("With coordinates between intersections %lli (%f, %f) and %lli (%f, %f)\n",
+        best_match->street->from_intersection_id, best_match->street->from_intersection_lat,
+        best_match->street->from_intersection_lon, best_match->street->to_intersection_id,
+        best_match->street->to_intersection_lat, best_match->street->to_intersection_lon);
+
+
+
     return (0);
 }
 
@@ -379,7 +488,7 @@ hashmap *create_hashmap() {
 
 // Find existing intersection in a bucket by going through the list
 hashmap_entry *find_intersection(hashmap *graph, int intersection_id, int index) {
-  
+
   hashmap_entry *current = graph->table[index];
 
   while (current != NULL) {
@@ -397,7 +506,7 @@ void add_street_to_intersection(hashmap *graph, int intersection_id, data_street
 
   int index = hash_intersection(intersection_id); // find index bucket
 
-  hashmap_entry *entry = find_intersection(graph, intersection_id, index); // find where the 
+  hashmap_entry *entry = find_intersection(graph, intersection_id, index); // find where the
 
   // if the bucket is null, create the bucket
   if (entry == NULL) {
@@ -423,7 +532,7 @@ void add_street_to_intersection(hashmap *graph, int intersection_id, data_street
 
 // Load streets into the hashmap
 void load_streets_into_graph(hashmap *graph, data_streets streets[], int number_of_streets) {
-  
+
   for (int i = 0; i < number_of_streets; i++) {
     data_streets *street = &streets[i];
 
@@ -434,7 +543,7 @@ void load_streets_into_graph(hashmap *graph, data_streets streets[], int number_
 
 // find connected street in a bucket
 node *get_connected_streets(hashmap *graph, int intersection_id) {
-  
+
   int index = hash_intersection(intersection_id); // find index bucket
 
   hashmap_entry *entry = find_intersection(graph, intersection_id, index);
@@ -452,7 +561,7 @@ void print_connected_streets(hashmap *graph, int intersection_id) {
   printf("Intersection %d is connected to:\n", intersection_id);
 
   while (current != NULL) {
-    printf("- %s, length: %lf meters\n", current->street->street_name,
+    printf("- %s, length: %lf meters\n", current->name,
            current->street->length_meters);
     current = current->next;
   }

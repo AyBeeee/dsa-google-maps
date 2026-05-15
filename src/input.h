@@ -15,16 +15,17 @@ typedef struct data_places {
 } data_places;
 
 typedef struct data_streets {
-  int from_intersection_id;
+  long long from_intersection_id;
   double from_intersection_lat, from_intersection_lon;
-  int to_intersection_id;
+  long long to_intersection_id;
   double to_intersection_lat, to_intersection_lon;
   double length_meters;
-  char street_name[50];
+  double midX;
+  double midY;
 } data_streets;
 
 typedef struct node {
-  char name[50];
+  char *name;
   double lat, lon;
   struct node *next;
   struct data_houses *house;
