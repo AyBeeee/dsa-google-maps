@@ -15,12 +15,12 @@ typedef struct data_places {
 } data_places;
 
 typedef struct data_streets {
-  int from_intersection_id;
+  long long from_intersection_id;
   double from_intersection_lat, from_intersection_lon;
-  int to_intersection_id;
+  long long to_intersection_id;
   double to_intersection_lat, to_intersection_lon;
   double length_meters;
-  char street_name[50];
+  double midpoint;
 } data_streets;
 
 typedef struct node {
@@ -30,7 +30,6 @@ typedef struct node {
   struct data_houses *house;
   struct data_places *place;
   struct data_streets *street;
-  // struct dataw_streets *street;
 } node;
 
 typedef struct {
@@ -51,7 +50,7 @@ typedef struct {
 } list_map;
 
 typedef struct hashmap_entry {
-  int intersection_id;
+  long long intersection_id;
   node *connected_streets;
   struct hashmap_entry *next;
 } hashmap_entry;
