@@ -51,7 +51,7 @@ int findnchar(char *str, char c, int n)
     if (n <= 0)
         return 0;
     int i = 0;
-    for (i = i; str[i] && n > 0; i++)
+    for (i = 0; str[i] && n > 0; i++)
     {
         if (str[i] == c)
             n--;
@@ -141,7 +141,7 @@ int load_places(list_map *list) {
   }
 
   // load list
-  char line[256];
+  char line[1024];
   while (fgets(line, sizeof(line), fp)) { // load line by line with fgets
 
     node *newnode = malloc(sizeof(node));
@@ -163,7 +163,7 @@ int load_places(list_map *list) {
 
     //calloc for length of name string (in this case between second and first comma characters)
     newnode->name = calloc(findnchar(line, ',', 2) - findnchar(line, ',', 1) + 1, sizeof(char));
-    sscanf(line, "%49[^,],%49[^,],%49[^,],%lf,%lf", newnode->place->id,
+    sscanf(line, "%49[^,],%[^,],%49[^,],%lf,%lf", newnode->place->id,
            newnode->name, newnode->place->amenity, &newnode->lat,
            &newnode->lon);
     // printf("parsed and saved %s, %s, %s, %f, %f\n", newnode->place->id,
@@ -514,8 +514,11 @@ void add_street_to_intersection(hashmap *graph, long long intersection_id, node 
 
   // if the bucket is not null, add the new node connected to the element in the bucket since the streets will be connected
   node *new_node = malloc(sizeof(node));
+  if (new_node == NULL) {
+    return;
+  }
 
-  strcpy(new_node->name, curr->name);
+  new_node->name = curr->name;
   new_node->street = curr->street;
   new_node->lat = curr->lat;
   new_node->lon = curr->lon;

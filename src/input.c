@@ -4,6 +4,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void read_long_input(char *buffer, int size) {
+  int ch;
+  int newline;
+
+  if (fgets(buffer, size, stdin) == NULL) {
+    buffer[0] = '\0';
+    return;
+  }
+
+  newline = strcspn(buffer, "\n");
+  if (buffer[newline] == '\n') {
+    buffer[newline] = '\0';
+  } else {
+    while ((ch = getchar()) != '\n' && ch != EOF) {
+    }
+  }
+}
+
 void free_map(list_map *list) {
   node *temp;
   while (list->head_houses) {
@@ -100,11 +118,14 @@ void ask_address(list_map *list) { // pass the malloc from ask_map
 
   else if (option == 2) {
 
-    char street[50];
+    char street[256];
+    int ch;
 
     printf("Enter place name (e.g. 'Universitat Pompeu Fabra–Campus del "
            "Poblenou' or 'L'Illa Diagonal'):\n");
-    scanf(" %49[^\n]", street);
+    while ((ch = getchar()) != '\n' && ch != EOF) {
+    }
+    read_long_input(street, sizeof(street));
 
     find_node(list, street, PLACES);
   }
