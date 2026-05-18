@@ -317,6 +317,8 @@ int find_node(list_map *list, char *street, int stype) {
   char *matched_street = street;
   char choice;
   int num = -1;
+  int place_matches = 0;
+  node *first_place_match = NULL;
 
   if (stype == HOUSES) {
     printf("Enter street number (e.g. '138'): \n");
@@ -342,8 +344,10 @@ int find_node(list_map *list, char *street, int stype) {
         printf("Found at %lf | %lf\n", curr->lat, curr->lon);
         return 1;
       } else if (stype != HOUSES) {
-        printf("Found at %lf | %lf\n", curr->lat, curr->lon);
-        return 1;
+        if (place_matches == 0) {
+          first_place_match = curr;
+        }
+        place_matches++;
       }
     }
 
@@ -357,6 +361,49 @@ int find_node(list_map *list, char *street, int stype) {
       }
     }
     curr = curr->next;
+  }
+
+  if (stype == PLACES && place_matches == 1) {
+    printf("Found at %lf | %lf\n", first_place_match->lat,
+           first_place_match->lon);
+    return 1;
+  }
+
+  if (stype == PLACES && place_matches > 1) {
+    int option = 1;
+    int selected;
+
+    printf("There is more than one place with this name:\n");
+    curr = list->head_places;
+    while (curr != NULL) {
+      if (strcmp(curr->name, street) == 0) {
+        printf("%d. %s (%s) at %lf | %lf\n", option, curr->name,
+               curr->place->amenity, curr->lat, curr->lon);
+        option++;
+      }
+      curr = curr->next;
+    }
+
+    printf("Choose one: ");
+    scanf("%d", &selected);
+
+    if (selected < 1 || selected > place_matches) {
+      printf("Wrong input!\n");
+      return -1;
+    }
+
+    option = 1;
+    curr = list->head_places;
+    while (curr != NULL) {
+      if (strcmp(curr->name, street) == 0) {
+        if (option == selected) {
+          printf("Found at %lf | %lf\n", curr->lat, curr->lon);
+          return 1;
+        }
+        option++;
+      }
+      curr = curr->next;
+    }
   }
 
   if (best_dist < threshold && best_match != NULL) {
