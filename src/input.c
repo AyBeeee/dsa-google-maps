@@ -83,7 +83,8 @@ void ask_map() {
     }
 
     hashmap *graph = create_hashmap(); // init hashmap, named graph
-    load_streets_into_graph(graph, list.head_streets); // load streets into the hashmap
+    load_streets_into_graph(graph,
+                            list.head_streets); // load streets into the hashmap
 
     printf("Houses loaded: %d\n", loaded_houses);
     printf("Places loaded: %d\n", loaded_places);
