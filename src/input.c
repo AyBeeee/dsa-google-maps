@@ -1,65 +1,7 @@
+#include "hash.h"
 #include "main.h" // already includes input.h so no need for the input.h file
 #include "parsing.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-static void read_long_input(char *buffer, int size) {
-  int ch;
-  int newline;
-
-  if (fgets(buffer, size, stdin) == NULL) {
-    buffer[0] = '\0';
-    return;
-  }
-
-  newline = strcspn(buffer, "\n");
-  if (buffer[newline] == '\n') {
-    buffer[newline] = '\0';
-  } else {
-    while ((ch = getchar()) != '\n' && ch != EOF) {
-    }
-  }
-}
-
-void free_map(list_map *list) {
-  node *temp;
-  while (list->head_houses) {
-    temp = list->head_houses->next;
-    free(list->head_houses->name);
-    free(list->head_houses->house);
-    free(list->head_houses);
-    list->head_houses = temp;
-  }
-  while (list->head_places) {
-    temp = list->head_places->next;
-    free(list->head_places->name);
-    free(list->head_places->place);
-    free(list->head_places);
-    list->head_places = temp;
-  }
-  while (list->head_streets) {
-    temp = list->head_streets->next;
-    free(list->head_streets->name);
-    free(list->head_streets->street);
-    free(list->head_streets);
-    list->head_streets = temp;
-  }
-}
-
-void init_list(list_map *list) {
-  list->head_houses = NULL;
-  list->tail_houses = NULL;
-  list->size_houses = 0;
-
-  list->head_places = NULL;
-  list->tail_places = NULL;
-  list->size_places = 0;
-
-  list->head_streets = NULL;
-  list->tail_streets = NULL;
-  list->size_streets = 0;
-}
+#include "utils.h"
 
 void ask_map() {
 
@@ -83,7 +25,10 @@ void ask_map() {
     }
 
     hashmap *graph = create_hashmap(); // init hashmap, named graph
-    load_streets_into_graph(graph, list.head_streets); // load streets into the hashmap
+    load_streets_into_graph(graph,
+                            list.head_streets); // load streets into the hashmap
+
+    list.graph = graph;
 
     printf("Houses loaded: %d\n", loaded_houses);
     printf("Places loaded: %d\n", loaded_places);

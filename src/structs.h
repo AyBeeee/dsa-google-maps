@@ -1,5 +1,5 @@
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef STRUCTS_H
+#define STRUCTS_H
 #include <stdlib.h>
 #define TABLE_SIZE 1000
 
@@ -47,6 +47,8 @@ typedef struct {
   node *head_streets;
   node *tail_streets;
   int size_streets;
+
+  struct hashmap *graph;
 
 } list_map;
 
