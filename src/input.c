@@ -20,19 +20,19 @@ void ask_map() {
     int loaded_streets = load_streets(&list);
 
     if (loaded_houses == -1 || loaded_places == -1 || loaded_streets == -1) {
-      printf("No list loaded\n");
+      printf("Error loading list\n");
       return;
     }
 
-    hashmap *graph = create_hashmap(); // init hashmap, named graph
-    load_streets_into_graph(graph,
-                            list.head_streets); // load streets into the hashmap
 
-    list.graph = graph;
 
     printf("Houses loaded: %d\n", loaded_houses);
     printf("Places loaded: %d\n", loaded_places);
     printf("Streets loaded: %d\n", loaded_streets);
+    hashmap *graph = create_hashmap(&list); // init hashmap, named graph
+    load_streets_into_graph(graph,
+                            list.head_streets); // load streets into the hashmap
+    list.graph = graph;
     ask_address(&list);
   }
 

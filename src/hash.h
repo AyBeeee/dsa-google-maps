@@ -1,7 +1,7 @@
 #include "structs.h"
 #include <stdbool.h>
 
-int hash_intersection(long long intersection_id);
+int hash_intersection(hashmap *hash, long long intersection_id);
 
 hashmap *create_hashmap();
 hashmap_entry *find_intersection(hashmap *graph, long long intersection_id,

@@ -2,9 +2,6 @@
 #include "utils.h"
 #include <stdio.h>
 
-// TODO esto todo en utils.c
-//
-
 // builds the houses linked list, allocating, assigning variables, and linking
 // each node
 int load_houses(list_map *list) {
@@ -136,6 +133,7 @@ int load_places(list_map *list) {
 
 int load_streets(list_map *list) {
   char route[256] = "maps/";
+  list->size_streets = 0;
   strcat(route, list->map);
   strcat(route, "/streets.txt");
   printf("Current route: %s\n", route);

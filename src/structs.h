@@ -1,7 +1,7 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 #include <stdlib.h>
-#define TABLE_SIZE 1000
+
 
 enum type { HOUSES, PLACES };
 
@@ -59,7 +59,8 @@ typedef struct hashmap_entry {
 } hashmap_entry;
 
 typedef struct hashmap {
-  hashmap_entry *table[TABLE_SIZE];
+  hashmap_entry **table;
+  int table_size;
 } hashmap;
 
 #endif

@@ -12,4 +12,6 @@ void init_list(list_map *list) {
   list->head_streets = NULL;
   list->tail_streets = NULL;
   list->size_streets = 0;
+
+  list->graph = NULL;
 }
