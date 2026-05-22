@@ -73,6 +73,12 @@ char *skip_street_prefix(char *str) {
     return str + 5;
   if (strncmp(str, "passatge ", 9) == 0)
     return str + 9;
+  if (strncmp(str, "pl. ", 4) == 0)
+    return str + 4;
+  if (strncmp(str, "pl ", 3) == 0)
+    return str + 3;
+  if (strncmp(str, "plaça ", 6) == 0)
+    return str + 6;
   return str;
 }
 
