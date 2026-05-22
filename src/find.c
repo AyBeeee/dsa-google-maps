@@ -22,7 +22,7 @@ int find_coordinate(list_map *list, double x_target, double y_target) {
 
   printf("Your coordinates: %f, %f\n", x_target, y_target);
   printf("Closest street to you: %s\n", best_match->name);
-  printf("With coordinates between intersections %lli (%f, %f) and %lli (%f, "
+  printf("With coordinates between intersections %lld (%f, %f) and %lld (%f, "
          "%f)\n",
          best_match->street->from_intersection_id,
          best_match->street->from_intersection_lat,

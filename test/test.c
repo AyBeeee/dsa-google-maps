@@ -1,30 +1,34 @@
-#include "sample_lib_test.c"
+#include "../src/hash.h"
+#include "../src/parsing.h"
+#include "../src/structs.h"
 #include "utils.h"
-#include <stdio.h>
-#include <stdbool.h>
 #include <assert.h>
-#include "./src/input.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
-int main() {
-  {
-    // Call all test modules you want to run here
-    test_create_hashmap_type();
-    test_hash_intersection(3.12318291210923);
-    test_load_streets_into_graph();
-    test_find_intersection_and_add_street();
-    
-    // free hashmap to-do
-    sample_lib_test();
-  }
+void init_list(list_map *list);
+void test_create_hashmap_type(void);
+bool test_hash_intersection(long long intersection_id);
+void test_load_streets_into_graph(void);
+void test_find_intersection_and_add_street(void);
+
+int main(void) {
+  test_create_hashmap_type();
+  assert(test_hash_intersection(3));
+  test_load_streets_into_graph();
+  test_find_intersection_and_add_street();
   allsuccess();
 }
 
 // If create_hashmap() returns hashmap *, this compiles.
 void test_create_hashmap_type(void) {
   hashmap *g = create_hashmap();
+  assert(g != NULL);
 }
 
-// If the intersection returns the same value as calculating it manually it works
+// If the intersection returns the same value as calculating it manually it
+// works
 bool test_hash_intersection(long long intersection_id) {
   int num = hash_intersection(intersection_id);
 
@@ -52,9 +56,11 @@ void test_load_streets_into_graph() {
   load_streets_into_graph(graph, list.head_streets);
 
   // create 3 nodes to test from, to and an uknown one
-  node *from_list = get_connected_streets(graph, first->street->from_intersection_id);
-  node *to_list   = get_connected_streets(graph, first->street->to_intersection_id);
-  node *missing   = get_connected_streets(graph, -1);
+  node *from_list =
+      get_connected_streets(graph, first->street->from_intersection_id);
+  node *to_list =
+      get_connected_streets(graph, first->street->to_intersection_id);
+  node *missing = get_connected_streets(graph, 999999);
 
   assert(from_list != NULL);
   assert(to_list != NULL);
