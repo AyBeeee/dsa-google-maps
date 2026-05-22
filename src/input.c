@@ -86,6 +86,8 @@ void ask_map() {
     load_streets_into_graph(graph,
                             list.head_streets); // load streets into the hashmap
 
+    list.graph = graph;
+
     printf("Houses loaded: %d\n", loaded_houses);
     printf("Places loaded: %d\n", loaded_places);
     printf("Streets loaded: %d\n", loaded_streets);

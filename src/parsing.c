@@ -88,6 +88,12 @@ char *skip_street_prefix(char *str) {
     return str + 5;
   if (strncmp(str, "passatge ", 9) == 0)
     return str + 9;
+  if (strncmp(str, "pl. ", 4) == 0)
+    return str + 4;
+  if (strncmp(str, "pl ", 3) == 0)
+    return str + 3;
+  if (strncmp(str, "plaça ", 6) == 0)
+    return str + 6;
   return str;
 }
 
@@ -454,7 +460,6 @@ int find_node(list_map *list, char *street, int stype) {
     int best_num_dist = INT_MAX;
     node *best_num_match = NULL;
 
-    printf("We found the street, but number %d is not valid.\n", num);
     printf("Valid numbers in %s: ", matched_street);
 
     snprintf(num_str, sizeof(num_str), "%d", num);
@@ -463,8 +468,11 @@ int find_node(list_map *list, char *street, int stype) {
     while (curr != NULL) {
       if (strcmp(curr->name, matched_street) == 0) {
         int dist;
+        // list with found number
+        // if your num is in the list -> found
+        // if not found -> print invalid num & print availablwe numbers
+        // flow of selecting correct number
 
-        printf("%d ", curr->house->num);
         snprintf(candidate_str, sizeof(candidate_str), "%d", curr->house->num);
         dist = LevenshteinDistance(candidate_str, num_str);
 
@@ -478,10 +486,12 @@ int find_node(list_map *list, char *street, int stype) {
     printf("\n");
 
     if (best_num_match != NULL) {
-      printf("Did you mean number %d? [Y-N]\n", best_num_match->house->num);
-      scanf(" %c", &choice);
-
-      if (choice == 'Y' || choice == 'y') {
+      if (best_num_match->house->num != num) {
+        printf("We found the street, but number %d is not valid.\n", num);
+        printf("Did you mean number %d? [Y-N]\n", best_num_match->house->num);
+        scanf(" %c", &choice);
+      }
+      if (choice == 'Y' || choice == 'y' || best_num_match->house->num == num) {
         printf("Found at %lf | %lf\n", best_num_match->lat,
                best_num_match->lon);
         return 1;
