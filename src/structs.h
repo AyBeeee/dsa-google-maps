@@ -1,5 +1,5 @@
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef STRUCTS_H
+#define STRUCTS_H
 #include <stdlib.h>
 #define TABLE_SIZE 1000
 
