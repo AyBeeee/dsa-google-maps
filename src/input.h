@@ -48,6 +48,8 @@ typedef struct {
   node *tail_streets;
   int size_streets;
 
+  struct hashmap *graph;
+
 } list_map;
 
 typedef struct hashmap_entry {
