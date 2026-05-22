@@ -39,6 +39,21 @@ void midpoint(node *newnode) {
   newnode->street->midY = toDegrees(lon);
 }
 
+double haversine(double lat_A, double lon_A, double lat_B, double lon_B)
+{
+    double lat1 = toRadians(lat_A);
+    double lon1 = toRadians(lon_A);
+    double lat2 = toRadians(lat_B);
+    double lon2 = toRadians(lon_B);
+
+    double dLat = lat2 - lat1;
+    double dLon = lon2 - lon1;
+    double a = pow(sin(dLat/2), 2) +
+        cos(lat1) * cos(lat2) * pow(sin(dLon / 2), 2);
+    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return 6371.0 * c; //EARTH_RADIUS * c
+}
+
 int findnchar(char *str, char c, int n) {
   if (!str)
     return -1;
@@ -280,31 +295,19 @@ int load_streets(list_map *list) {
 }
 
 int find_coordinate(list_map *list, double x_target, double y_target) {
-  // convert the input coordinates into strings for the laveshtein distance
-  // stuff
-  char s_xtarget[16];
-  char s_ytarget[16];
-  snprintf(s_xtarget, sizeof(s_xtarget), "%f", x_target);
-  snprintf(s_ytarget, sizeof(s_ytarget), "%f", y_target);
 
   node *curr = list->head_streets;
   node *best_match = NULL;
-  int best_dist = 999;
+  int best_dist = INT_MAX;
   for (int i = 0; i < list->size_streets; i++) {
-    char s_xmidpoint[16];
-    char s_ymidpoint[16];
-    snprintf(s_xmidpoint, sizeof(s_xmidpoint), "%f", curr->street->midX);
-    snprintf(s_ymidpoint, sizeof(s_ymidpoint), "%f", curr->street->midY);
 
-    int xDist = LevenshteinDistance(s_xmidpoint, s_xtarget);
-    int yDist = LevenshteinDistance(s_xmidpoint, s_xtarget);
+    int dist = haversine(curr->street->midX, curr->street->midY, x_target, y_target);
 
     // printf("dist calculated is: %i\n", dist); //DEBUG
-    if (xDist + yDist < best_dist) {
-      best_dist = xDist + yDist;
+    if (dist < best_dist) {
+      best_dist = dist;
       best_match = curr;
     }
-    printf("distances: %i + %i = %i\n", xDist, yDist, xDist + yDist);
     curr = curr->next;
   }
 
