@@ -24,8 +24,6 @@ void ask_map() {
       return;
     }
 
-
-
     printf("Houses loaded: %d\n", loaded_houses);
     printf("Places loaded: %d\n", loaded_places);
     printf("Streets loaded: %d\n", loaded_streets);

@@ -43,25 +43,22 @@ void free_map(list_map *list) {
     free(list->head_streets);
     list->head_streets = temp;
   }
-  if (list->graph)
-  {
+  if (list->graph) {
     for (int i = 0; i < list->graph->table_size; i++) {
-        if (list->graph->table[i] != NULL)
-        {
-            printf("delete: %lli\n", list->graph->table[i]->intersection_id);
+      if (list->graph->table[i] != NULL) {
+        // printf("delete: %lli\n", list->graph->table[i]->intersection_id);
+        // DEBUG
 
-            node *head = list->graph->table[i]->connected_streets;
-            node *temp = NULL;
-            int j = 0;
-            while (head)
-            {
-                temp = head->next;
-                free(head);
-                head = temp;
-                printf("delete inside: %i\n", j++);
-            }
+        node *head = list->graph->table[i]->connected_streets;
+        node *temp = NULL;
+        while (head) {
+          temp = head->next;
+          free(head);
+          head = temp;
+          // printf("delete inside: %i\n", j++); DEBUG
         }
-            free(list->graph->table[i]);
+      }
+      free(list->graph->table[i]);
     }
     free(list->graph->table);
     free(list->graph);

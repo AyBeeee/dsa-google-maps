@@ -2,7 +2,6 @@
 #define STRUCTS_H
 #include <stdlib.h>
 
-
 enum type { HOUSES, PLACES };
 
 typedef struct data_houses {
