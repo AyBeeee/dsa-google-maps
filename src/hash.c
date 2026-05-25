@@ -31,6 +31,7 @@ int unique_intersections(list_map *list) {
     head = head->next;
   }
   free(intersections);
+  printf("%i\n", num_unique);
   return (num_unique);
 }
 
