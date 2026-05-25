@@ -31,25 +31,23 @@ void test_create_hashmap_type() {
   list_map list;
   init_list(&list);
 
-strcpy(list.map, "xs_1");
-    load_streets(&list);
+  strcpy(list.map, "xs_1");
+  load_streets(&list);
   hashmap *g = create_hashmap(&list);
   assert(g != NULL);
   printf("Test Create Hashmap Successful!\n");
-
 }
 
 // If the intersection returns the same value as calculating it manually it
 // works
 bool test_hash_intersection(long long intersection_id) {
-    list_map list;
-    init_list(&list);
+  list_map list;
+  init_list(&list);
   strcpy(list.map, "xs_1");
   load_streets(&list);
   hashmap *graph = create_hashmap(&list);
 
-    int num = hash_intersection(graph, intersection_id);
-
+  int num = hash_intersection(graph, intersection_id);
 
   if (num == intersection_id % graph->table_size) {
     return true;
@@ -60,15 +58,12 @@ bool test_hash_intersection(long long intersection_id) {
 // Recreate the flow of creating->loading streets -> loading streets into graph
 void test_load_streets_into_graph() {
 
-    list_map list;
-    init_list(&list);
+  list_map list;
+  init_list(&list);
   strcpy(list.map, "xs_1");
   int loaded = load_streets(&list);
 
   hashmap *graph = create_hashmap(&list);
-
-
-
 
   assert(loaded > 0);
   assert(list.head_streets != NULL);
@@ -90,13 +85,12 @@ void test_load_streets_into_graph() {
   assert(from_list->street != NULL);
   assert(to_list->street != NULL);
   printf("Test Load Streets into Graph Successful!\n");
-
 }
 
 // test find_intersection
 void test_find_intersection_and_add_street() {
-    list_map list;
-    init_list(&list);
+  list_map list;
+  init_list(&list);
   strcpy(list.map, "xs_1");
   load_streets(&list);
   hashmap *graph = create_hashmap(&list);
@@ -138,7 +132,6 @@ void test_find_intersection_and_add_street() {
   assert(connected->street->from_intersection_id == 10);
   assert(connected->street->to_intersection_id == 20);
   printf("Test Find Intersection and Add Street Successful!\n");
-
 }
 
 // test free hashmap to-do

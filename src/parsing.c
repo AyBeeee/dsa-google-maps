@@ -9,7 +9,7 @@ int load_houses(list_map *list) {
   char route[256] = "maps/";
   strcat(route, list->map);
   strcat(route, "/houses.txt");
-  //printf("Current route: %s\n", route); // DEBUG
+  // printf("Current route: %s\n", route); // DEBUG
 
   // open file
   FILE *fp = fopen(route, "r");
@@ -71,7 +71,7 @@ int load_places(list_map *list) {
   char route[256] = "maps/";
   strcat(route, list->map);
   strcat(route, "/places.txt");
-  //printf("Current route: %s\n", route); // DEBUG
+  // printf("Current route: %s\n", route); // DEBUG
 
   // open file
   FILE *fp = fopen(route, "r");
@@ -136,7 +136,7 @@ int load_streets(list_map *list) {
   list->size_streets = 0;
   strcat(route, list->map);
   strcat(route, "/streets.txt");
-  //printf("Current route: %s\n", route);
+  // printf("Current route: %s\n", route);
 
   // open file
   FILE *fp = fopen(route, "r");

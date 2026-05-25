@@ -120,19 +120,18 @@ void load_streets_into_graph(hashmap *graph, node *head_streets) {
   }
 }
 
-hashmap_entry *in_intersection(hashmap *graph, int index, long long search_id)
-{
-    hashmap_entry *current = graph->table[index];
+hashmap_entry *in_intersection(hashmap *graph, int index, long long search_id) {
+  hashmap_entry *current = graph->table[index];
 
-    while (current != NULL) {
-      if (current->intersection_id == search_id)
-        return current;
-      // printf("current intersection id is %lli\n", current->intersection_id);
-      // DEBUG
-      current = current->next;
-    }
+  while (current != NULL) {
+    if (current->intersection_id == search_id)
+      return current;
+    // printf("current intersection id is %lli\n", current->intersection_id);
+    // DEBUG
+    current = current->next;
+  }
 
-    return NULL;
+  return NULL;
 }
 
 // find connected street in a bucket
