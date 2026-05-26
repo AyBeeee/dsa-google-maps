@@ -15,6 +15,7 @@ void test_create_hashmap_type(list_map *list);
 bool test_hash_intersection(list_map *list, long long intersection_id);
 void test_load_streets_into_graph(list_map *list);
 void test_find_intersection_and_add_street(list_map *list);
+void test_freeing_hashmap(list_map *list);
 void test_places_parse_list(list_map *list);
 void test_streets_parse_list(list_map *list);
 void free_map(list_map *list);
@@ -36,6 +37,7 @@ int main(void) {
   printf("Test Hashmap Intersection Successful!\n");
   test_load_streets_into_graph(&list);
   test_find_intersection_and_add_street(&list);
+  test_freeing_hashmap(&list);
   printf("Lab 5 Unit Tests Passed!\n\n");
 
   allsuccess();
@@ -151,4 +153,18 @@ void test_find_intersection_and_add_street(list_map *list) {
   printf("Test Find Intersection and Add Street Successful!\n");
 }
 
-// test free hashmap to-do
+void test_freeing_hashmap(list_map *list) {
+
+  free_map(list);
+
+  assert(list->head_houses == NULL);
+  assert(list->tail_houses == NULL);
+
+  assert(list->head_places == NULL);
+  assert(list->tail_places == NULL);
+
+  assert(list->head_streets == NULL);
+  assert(list->tail_streets == NULL);
+
+  assert(list->graph == NULL);
+}

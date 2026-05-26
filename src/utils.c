@@ -29,6 +29,9 @@ void free_map(list_map *list) {
     free(list->head_houses);
     list->head_houses = temp;
   }
+  list->head_houses = NULL;
+  list->tail_houses = NULL;
+
   while (list->head_places) {
     temp = list->head_places->next;
     free(list->head_places->name);
@@ -36,6 +39,9 @@ void free_map(list_map *list) {
     free(list->head_places);
     list->head_places = temp;
   }
+  list->head_places = NULL;
+  list->tail_places = NULL;
+
   while (list->head_streets) {
     temp = list->head_streets->next;
     free(list->head_streets->name);
@@ -43,6 +49,9 @@ void free_map(list_map *list) {
     free(list->head_streets);
     list->head_streets = temp;
   }
+  list->head_streets = NULL;
+  list->tail_streets = NULL;
+
   if (list->graph) {
     for (int i = 0; i < list->graph->table_size; i++) {
       if (list->graph->table[i] != NULL) {
@@ -63,8 +72,7 @@ void free_map(list_map *list) {
     free(list->graph->table);
     free(list->graph);
   }
-  //TODO maybe set the pointers to NULL? depending on whether we need them or to_intersection_lat
-  // for the free unit test
+  list->graph = NULL;
 }
 
 double toDegrees(double radians) { return radians * (180.0 / M_PI); }
