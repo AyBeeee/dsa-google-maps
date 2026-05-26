@@ -63,6 +63,8 @@ void free_map(list_map *list) {
     free(list->graph->table);
     free(list->graph);
   }
+  //TODO maybe set the pointers to NULL? depending on whether we need them or to_intersection_lat
+  // for the free unit test
 }
 
 double toDegrees(double radians) { return radians * (180.0 / M_PI); }

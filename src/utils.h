@@ -16,4 +16,3 @@ int findnchar(char *str, char c, int n);
 char *skip_street_prefix(char *str);
 bool same_street_name(char *map_name, char *user_name);
 int LevenshteinDistance(char *a, char *b);
-int find_node(list_map *list, char *street, int stype);

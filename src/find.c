@@ -2,7 +2,7 @@
 #include "main.h"
 #include "utils.h"
 
-int find_coordinate(list_map *list, double x_target, double y_target) {
+node *find_coordinate(list_map *list, double x_target, double y_target) {
 
   node *curr = list->head_streets;
   node *best_match = NULL;
@@ -36,17 +36,17 @@ int find_coordinate(list_map *list, double x_target, double y_target) {
   // print_connected_streets(list->graph,
   // best_match->street->to_intersection_id, best_match->name, true);
 
-  return (0);
+  return (best_match);
 }
 
-int find_node(list_map *list, char *street, int stype) {
+node *find_node(list_map *list, char *street, int ntype) {
 
   node *curr = NULL;
   int size = 0;
-  if (stype == HOUSES) {
+  if (ntype == HOUSES) {
     curr = list->head_houses;
     size = list->size_houses;
-  } else if (stype == PLACES) {
+  } else if (ntype == PLACES) {
     curr = list->head_places;
     size = list->size_places;
   }
@@ -61,7 +61,7 @@ int find_node(list_map *list, char *street, int stype) {
   int place_matches = 0;
   node *first_place_match = NULL;
 
-  if (stype == HOUSES) {
+  if (ntype == HOUSES) {
     printf("Enter street number (e.g. '138'): \n");
     scanf("%d", &num);
   }
@@ -76,16 +76,16 @@ int find_node(list_map *list, char *street, int stype) {
     // printf("checking input to: %s.\n", curr->name); // DEBUG
 
     // compare exact match
-    if ((stype == HOUSES && same_street_name(curr->name, street)) ||
-        (stype == PLACES && strcmp(curr->name, street) == 0)) {
+    if ((ntype == HOUSES && same_street_name(curr->name, street)) ||
+        (ntype == PLACES && strcmp(curr->name, street) == 0)) {
       street_found = 1;
       matched_street = curr->name;
       // printf("Street's current NUM: %d.\n", curr->house->num); // DEBUG
 
-      if (stype == HOUSES && curr->house->num == num) {
+      if (ntype == HOUSES && curr->house->num == num) {
         printf("Found at %lf | %lf\n", curr->lat, curr->lon);
-        return 1;
-      } else if (stype != HOUSES) {
+        return curr;
+      } else if (ntype != HOUSES) {
         if (place_matches == 0) {
           first_place_match = curr;
         }
@@ -105,13 +105,13 @@ int find_node(list_map *list, char *street, int stype) {
     curr = curr->next;
   }
 
-  if (stype == PLACES && place_matches == 1) {
+  if (ntype == PLACES && place_matches == 1) {
     printf("Found at %lf | %lf\n", first_place_match->lat,
            first_place_match->lon);
-    return 1;
+    return first_place_match;
   }
 
-  if (stype == PLACES && place_matches > 1) {
+  if (ntype == PLACES && place_matches > 1) {
     int option = 1;
     int selected;
 
@@ -131,7 +131,7 @@ int find_node(list_map *list, char *street, int stype) {
 
     if (selected < 1 || selected > place_matches) {
       printf("Wrong input!\n");
-      return -1;
+      return NULL;
     }
 
     option = 1;
@@ -140,7 +140,7 @@ int find_node(list_map *list, char *street, int stype) {
       if (strcmp(curr->name, street) == 0) {
         if (option == selected) {
           printf("Found at %lf | %lf\n", curr->lat, curr->lon);
-          return 1;
+          return curr;
         }
         option++;
       }
@@ -158,11 +158,11 @@ int find_node(list_map *list, char *street, int stype) {
       matched_street = best_match->name;
     } else {
       printf("We couldn't find your location!\n");
-      return -1;
+      return NULL;
     }
   }
 
-  if (street_found && stype == HOUSES) {
+  if (street_found && ntype == HOUSES) {
     char num_str[16];
     char candidate_str[16];
     int best_num_dist = INT_MAX;
@@ -202,13 +202,13 @@ int find_node(list_map *list, char *street, int stype) {
       if (choice == 'Y' || choice == 'y' || best_num_match->house->num == num) {
         printf("Found at %lf | %lf\n", best_num_match->lat,
                best_num_match->lon);
-        return 1;
+        return best_num_match;
       }
     }
 
     printf("That number is not valid for this street\n");
-    return -1;
+    return NULL;
   }
   printf("We couldn't find your location!\n");
-  return -1;
+  return NULL;
 }

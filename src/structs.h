@@ -2,7 +2,8 @@
 #define STRUCTS_H
 #include <stdlib.h>
 
-enum type { HOUSES, PLACES, STREETS };
+enum nodetype { HOUSES, PLACES, STREETS };
+enum searchtype { ORIGIN, DESTINATION };
 
 typedef struct data_houses {
   int num;

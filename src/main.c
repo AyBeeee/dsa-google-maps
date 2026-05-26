@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include "structs.h"
+#include "utils.h"
 
 void createaleak() {
   char *foo = malloc(20 * sizeof(char));
@@ -9,6 +11,17 @@ void createaleak() {
 }
 
 int main() {
-  ask_map();
-  return 0;
+  list_map list;
+  ask_map(&list);
+  node *origin = ask(&list, ORIGIN);
+  if (!origin)
+      printf("Exiting...\n");
+  node *destination = ask(&list, DESTINATION);
+  if (!destination)
+      printf("Exiting...\n");
+
+  //if (origin && destination)
+  //find_route(node *origin, node *destination, &list);
+  free_map(&list);
+
 }

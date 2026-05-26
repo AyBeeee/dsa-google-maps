@@ -4,10 +4,12 @@
 #include "structs.h"
 #include <stdio.h>
 
-void ask_map();
+node *ask(list_map *list, int stype);
+node *ask_node(list_map *list);
+void ask_map(list_map *list);
 void ask_address(list_map *h);
-int find_node(list_map *list, char *street, int stype);
-int find_coordinate(list_map *list, double x_target, double y_target);
+node *find_node(list_map *list, char *street, int stype);
+node *find_coordinate(list_map *list, double x_target, double y_target);
 void init_list(list_map *list);
 
 #endif
