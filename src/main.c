@@ -20,6 +20,7 @@ int main() {
   if (!destination)
       printf("Exiting...\n");
 
+
   //if (origin && destination)
   //find_route(node *origin, node *destination, &list);
   free_map(&list);

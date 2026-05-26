@@ -52,14 +52,16 @@ typedef struct {
 
 } list_map;
 
-typedef struct hashmap_entry {
+typedef struct intersection {
   long long intersection_id;
+  double intersection_lat, intersection_lon;
+
   node *connected_streets;
-  struct hashmap_entry *next;
-} hashmap_entry;
+  struct intersection *next;
+} intersection;
 
 typedef struct hashmap {
-  hashmap_entry **table;
+  intersection **table;
   int table_size;
 } hashmap;
 

@@ -40,7 +40,7 @@ hashmap *create_hashmap(list_map *list) {
 
   hashmap *graph = malloc(sizeof(hashmap));
   graph->table_size = unique_intersections(list);
-  graph->table = malloc(graph->table_size * sizeof(hashmap_entry));
+  graph->table = malloc(graph->table_size * sizeof(intersection));
   if (graph->table == NULL)
     return NULL;
 
@@ -53,9 +53,9 @@ hashmap *create_hashmap(list_map *list) {
 
 // Find existing intersection in a bucket by going through the list
 
-hashmap_entry *find_intersection(hashmap *graph, int index) {
+intersection *find_intersection(hashmap *graph, int index) {
 
-  hashmap_entry *current =
+  intersection *current =
       graph->table[index]; // current element in the bucket, starting at the
                            // first one
 
@@ -70,20 +70,22 @@ hashmap_entry *find_intersection(hashmap *graph, int index) {
   return NULL;
 }
 
-void add_street_to_intersection(hashmap *graph, long long intersection_id,
-                                node *curr) {
+void add_street_to_intersection(hashmap *graph, long long intersection_id, double intersection_lat,
+                                double intersection_lon, node *curr) {
 
   int index = hash_intersection(graph, intersection_id); // find index bucket
-  hashmap_entry *entry = find_intersection(graph, index);
+  intersection *entry = find_intersection(graph, index);
   // if the bucket is null, create the bucket
   if (entry == NULL) {
-    entry = malloc(sizeof(hashmap_entry));
+    entry = malloc(sizeof(intersection));
     if (!entry)
       return;
 
     entry->intersection_id = intersection_id;
     entry->connected_streets = NULL;
     entry->next = graph->table[index];
+    entry->intersection_lat = intersection_lat;
+    entry->intersection_lon = intersection_lon;
     graph->table[index] = entry;
     // printf("--- INDEX NEW BUCKET AT %i\n", index); DEBUG
   }
@@ -114,15 +116,15 @@ void load_streets_into_graph(hashmap *graph, node *head_streets) {
 
   while (curr != NULL) {
 
-    add_street_to_intersection(graph, curr->street->from_intersection_id, curr);
-    add_street_to_intersection(graph, curr->street->to_intersection_id, curr);
+    add_street_to_intersection(graph, curr->street->from_intersection_id, curr->street->from_intersection_lat, curr->street->from_intersection_lon, curr);
+    add_street_to_intersection(graph, curr->street->to_intersection_id, curr->street->to_intersection_lat, curr->street->to_intersection_lon, curr);
     // printf("Loaded %s\n", curr->name); DEBUG LOADING IN HASH MAP
     curr = curr->next;
   }
 }
 
-hashmap_entry *in_intersection(hashmap *graph, int index, long long search_id) {
-  hashmap_entry *current = graph->table[index];
+intersection *in_intersection(hashmap *graph, int index, long long search_id) {
+  intersection *current = graph->table[index];
 
   while (current != NULL) {
     if (current->intersection_id == search_id)
@@ -140,7 +142,7 @@ node *get_connected_streets(hashmap *graph, long long intersection_id) {
 
   int index = hash_intersection(graph, intersection_id); // find index bucket
 
-  hashmap_entry *entry = in_intersection(graph, index, intersection_id);
+  intersection *entry = in_intersection(graph, index, intersection_id);
 
   if (entry == NULL) {
     return NULL;

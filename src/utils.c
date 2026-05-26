@@ -2,6 +2,20 @@
 #include "structs.h"
 #include <stdio.h>
 
+/*
+// small util function to calculate which street our origin/destination
+// nodes fall into, to make the route calc slightly easier
+intersection *node_to_street(list_map *list, node *node)
+{
+    if (node->house)
+    {
+
+    }
+
+
+}
+*/
+
 void read_long_input(char *buffer, int size) {
   int ch;
   int newline;
