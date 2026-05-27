@@ -136,7 +136,8 @@ void test_find_intersection_and_add_street(list_map *list) {
   assert(find_intersection(graph, idx) == NULL);
 
   // add street to the bucket
-  add_street_to_intersection(graph, 10, street_node.lat, street_node.lon, &street_node);
+  add_street_to_intersection(graph, 10, street_node.lat, street_node.lon,
+                             &street_node);
 
   // find bucket based off the street
   intersection *entry = find_intersection(graph, idx);

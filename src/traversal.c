@@ -60,43 +60,45 @@ void build_path(queue *path, path_node *curr) {
 }
 
 queue *BFS(hashmap *graph, node *origin, node *destination) {
-
-  queue *explore_queue = malloc(sizeof(queue));
-  queue *paths_queue = malloc(sizeof(queue));
+  queue *path = malloc(sizeof(queue));
   queue *visited = malloc(sizeof(queue));
+  path_node *explore_head = NULL;
+  path_node *explore_tail = NULL;
+  long long origin_intersection = origin->street->from_intersection_id;
 
-  init_queue(explore_queue);
-  init_queue(paths_queue);
+  init_queue(path);
   init_queue(visited);
 
-  node *head_street =
-      get_connected_streets(graph, origin->street->from_intersection_id);
+  node *head_street = get_connected_streets(graph, origin_intersection);
 
-  // seed the queue to have some streets to start from
   while (head_street != NULL) {
-    enqueue(explore_queue, head_street);
+    enqueue_path(&explore_head, &explore_tail, head_street,
+                 next_intersection(head_street, origin_intersection), NULL);
     head_street = head_street->next;
   }
 
-  while (explore_queue->head != NULL) {
+  while (explore_head != NULL) {
+    path_node *curr_path = dequeue_path(&explore_head, &explore_tail);
+    node *curr_street = curr_path->street;
 
-    // first street (FIFO)
-    node *curr_street = dequeue(explore_queue);
-
-    if (strcmp(curr_street->name, destination->name) == 0) {
-      return paths_queue;
+    if (curr_street->street == destination->street ||
+        strcmp(curr_street->name, destination->name) == 0) {
+      build_path(path, curr_path);
+      return path;
     }
 
     if (node_in_queue(visited, curr_street) == NULL) {
       enqueue(visited, curr_street);
 
       node *connected_street =
-          get_connected_streets(graph, curr_street->street->to_intersection_id);
+          get_connected_streets(graph, curr_path->intersection_id);
 
-      // add the unvisited streets to the queue
       while (connected_street != NULL) {
         if (node_in_queue(visited, connected_street) == NULL) {
-          enqueue(explore_queue, connected_street);
+          enqueue_path(
+              &explore_head, &explore_tail, connected_street,
+              next_intersection(connected_street, curr_path->intersection_id),
+              curr_path);
         }
         connected_street = connected_street->next;
       }
