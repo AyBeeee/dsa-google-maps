@@ -2,29 +2,51 @@
 #include <stdlib.h>
 #include "structs.h"
 #include <limits.h>
+#include "utils.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include "structs.h"
+#include <limits.h>
+#include "utils.c"
 
-/*
-BFS(intersections_graph, fromStreet, toStreet):
-    create an empty queue of street lists, Q
 
-    create a street list [fromStreet], initial_path
-    enqueue initial_path into Q
-    create a street list [], visited
+queue* BFS(hashmap *graph, node *origin, node *destination) {
 
-    while Q is not empty:
-        path = dequeue(Q)
-        current_street = path[-1]
+    queue *explore_queue = malloc(sizeof(queue));
+    queue *paths_queue = malloc(sizeof(queue));
 
-        if current_street == toStreet:
-            return path
+    init_queue(explore_queue);
+    init_queue(paths_queue);
 
-        if current_street not in visited:
-            add current_street to visited
+    node *head_street = get_connected_streets(graph, origin->street->from_intersection_id);
 
-            for connected_street in intersections_graph[current_street.to_intersection_id]:
-                if connected_street not in visited:
-                    new_path = path + [connected_street]
-                    enqueue new_path into Q
+    while (head_street != NULL) {
+        enqueue(explore_queue, head_street);
+        head_street = head_street->next;
+    }
 
-    return NULL   # no path found
-*/
+    // create visited list
+    queue *visited = malloc(sizeof(queue));
+    init_queue(visited);
+
+    while (explore_queue->head != NULL) {
+
+        node *curr_street = dequeue(explore_queue);
+        
+        if (strcmp(curr_street->name, destination->name) == 0) {
+            return paths_queue;
+        }
+
+    if (node_in_queue(visited, curr_street) == NULL) {
+            enqueue(visited, curr_street);
+
+            node *connected_street = get_connected_streets(graph, curr_street->street->to_intersection_id);
+
+            while (connected_street != NULL) {
+                if (node_in_queue(visited, connected_street) == NULL) {
+                    enqueue(explore_queue, connected_street);
+                }
+                connected_street = connected_street->next;
+            }
+        }
+    }

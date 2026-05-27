@@ -237,25 +237,30 @@ int LevenshteinDistance(char *a, char *b) {
   return matrix[la][lb];
 }
 
+void init_queue(queue *q) {
+  q->head = NULL;
+  q->tail = NULL;
+}
+
 bool enqueue(queue *q, node *curr_node) {
 
-    node *newnode = malloc(sizeof(node));
-    newnode->name = curr_node->name;
-    newnode->lat = curr_node->lat;
-    newnode->lon = curr_node->lon;
-    newnode->street = curr_node->street;
-    newnode->next = NULL;
+  node *newnode = malloc(sizeof(node));
+  newnode->name = curr_node->name;
+  newnode->lat = curr_node->lat;
+  newnode->lon = curr_node->lon;
+  newnode->street = curr_node->street;
+  newnode->next = NULL;
 
-    if(q->head == NULL) {
-        q->head = newnode;
-    }
+  if (q->head == NULL) {
+    q->head = newnode;
+  }
 
-    if(q->tail != NULL) {
-        q->tail->next = newnode;
-    }
-    q->tail = newnode;
+  if (q->tail != NULL) {
+    q->tail->next = newnode;
+  }
+  q->tail = newnode;
 
-    return true;
+  return true;
 }
 
 int dequeue(queue *q) {
@@ -269,8 +274,21 @@ int dequeue(queue *q) {
   q->head = q->head->next;
 
   if (q->head == NULL) {
-      q->tail = NULL;
+    q->tail = NULL;
   }
 
   return curr;
+}
+
+node *node_in_queue(queue *q, node *curr) {
+    node *temp = q->head;
+
+    while (temp != NULL) {
+        if (temp->street == curr->street) {
+            return temp;
+        }
+        temp = temp->next;
+    }
+
+    return NULL;
 }
