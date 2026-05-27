@@ -1,20 +1,36 @@
 #include "utils.h"
+#include "main.h"
 #include "structs.h"
 #include <stdio.h>
 
-/*
+
 // small util function to calculate which street our origin/destination
 // nodes fall into, to make the route calc slightly easier
-intersection *node_to_street(list_map *list, node *node)
+node *node_to_street(list_map *list, node *to_convert)
 {
-    if (node->house)
+    double x = to_convert->lon;
+    double y = to_convert->lat;
+
+
+    /*node *temp = list->head_streets;
+    while (temp)
     {
+        printf("X im at: %f, X from: %f, X to %f\n", x, temp->street->from_intersection_lon, temp->street->to_intersection_lon);
+        printf("Y im at: %f, Y from: %f, Y to %f\n", y, temp->street->from_intersection_lat, temp->street->to_intersection_lat);
+        printf("--- name of street im checking %s\n", temp->name);
+        if (((x >= temp->street->from_intersection_lon && x <= temp->street->to_intersection_lon)
+            || (x >= temp->street->to_intersection_lon && x <= temp->street->from_intersection_lon))
+            &&
+            ((y >= temp->street->from_intersection_lat && y <= temp->street->to_intersection_lat)
+                || (y >= temp->street->to_intersection_lat && y <= temp->street->from_intersection_lat)))
+            return (temp);
 
+        temp = temp->next;
     }
-
-
+    printf("returning null\n");*/
+    return find_coordinate(list, x, y, false);
 }
-*/
+
 
 void read_long_input(char *buffer, int size) {
   int ch;
@@ -115,8 +131,8 @@ void midpoint(node *newnode) {
   double hyp = sqrt(x * x + y * y);
   double lat = atan2(z, hyp);
 
-  newnode->street->midX = toDegrees(lat);
-  newnode->street->midY = toDegrees(lon);
+  newnode->street->midX = toDegrees(lon);
+  newnode->street->midY = toDegrees(lat);
 }
 
 double haversine(double lat_A, double lon_A, double lat_B, double lon_B) {

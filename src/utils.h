@@ -1,9 +1,12 @@
-#include "structs.h"
-#include <ctype.h>
-#include <limits.h>
-#include <math.h>
-#include <stdbool.h>
-#include <string.h>
+#ifndef UTILS_H
+# define UTILS_H
+
+# include "structs.h"
+# include <ctype.h>
+# include <limits.h>
+# include <math.h>
+# include <stdbool.h>
+# include <string.h>
 
 int LevenshteinDistance(char *a, char *b);
 void read_long_input(char *buffer, int size);
@@ -16,3 +19,6 @@ int findnchar(char *str, char c, int n);
 char *skip_street_prefix(char *str);
 bool same_street_name(char *map_name, char *user_name);
 int LevenshteinDistance(char *a, char *b);
+node *node_to_street(list_map *list, node *node);
+
+#endif

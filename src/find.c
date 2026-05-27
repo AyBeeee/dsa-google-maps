@@ -2,7 +2,7 @@
 #include "main.h"
 #include "utils.h"
 
-node *find_coordinate(list_map *list, double x_target, double y_target) {
+node *find_coordinate(list_map *list, double x_target, double y_target, bool verbose) {
 
   node *curr = list->head_streets;
   node *best_match = NULL;
@@ -20,21 +20,22 @@ node *find_coordinate(list_map *list, double x_target, double y_target) {
     curr = curr->next;
   }
 
-  printf("Your coordinates: %f, %f\n", x_target, y_target);
-  printf("Closest street to you: %s\n", best_match->name);
-  printf("With coordinates between intersections %lld (%f, %f) and %lld (%f, "
-         "%f)\n",
-         best_match->street->from_intersection_id,
-         best_match->street->from_intersection_lat,
-         best_match->street->from_intersection_lon,
-         best_match->street->to_intersection_id,
-         best_match->street->to_intersection_lat,
-         best_match->street->to_intersection_lon);
+  if (verbose)
+  {
+    printf("Your coordinates: %f, %f\n", y_target, x_target);
+    printf("Closest street to you: %s\n", best_match->name);
+    printf("With coordinates between intersections %lld (%f, %f) and %lld (%f, "
+            "%f)\n",
+            best_match->street->from_intersection_id,
+            best_match->street->from_intersection_lat,
+            best_match->street->from_intersection_lon,
+            best_match->street->to_intersection_id,
+            best_match->street->to_intersection_lat,
+            best_match->street->to_intersection_lon);
 
-  print_connected_streets(list->graph, best_match->street->from_intersection_id,
-                          best_match->name, true);
-  // print_connected_streets(list->graph,
-  // best_match->street->to_intersection_id, best_match->name, true);
+    print_connected_streets(list->graph, best_match->street->from_intersection_id,
+                            best_match->name, true);
+  }
 
   return (best_match);
 }
@@ -152,10 +153,11 @@ node *find_node(list_map *list, char *street, int ntype) {
     printf("We couldn't find the address, did you mean: %s [Y-N]\n",
            best_match->name);
     scanf(" %c", &choice);
-
     if (choice == 'Y') {
-      street_found = 1;
-      matched_street = best_match->name;
+        printf("Found at %lf | %lf\n", best_match->lat,
+               best_match->lon);
+        return best_match;
+        return best_match;
     } else {
       printf("We couldn't find your location!\n");
       return NULL;

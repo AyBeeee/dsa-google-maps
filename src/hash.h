@@ -1,3 +1,6 @@
+#ifndef HASH_H
+# define HASH_H
+
 #include "structs.h"
 #include <stdbool.h>
 
@@ -12,3 +15,5 @@ void load_streets_into_graph(hashmap *graph, node *head_streets);
 node *get_connected_streets(hashmap *graph, long long intersection_id);
 void print_connected_streets(hashmap *graph, long long intersection_id,
                              char *name, bool notItself);
+
+#endif

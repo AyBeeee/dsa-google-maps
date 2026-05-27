@@ -1,6 +1,6 @@
 #ifndef STRUCTS_H
-#define STRUCTS_H
-#include <stdlib.h>
+# define STRUCTS_H
+# include <stdlib.h>
 
 enum nodetype { HOUSES, PLACES, STREETS };
 enum searchtype { ORIGIN, DESTINATION };

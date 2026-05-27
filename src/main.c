@@ -19,6 +19,12 @@ int main() {
   node *destination = ask(&list, DESTINATION);
   if (!destination)
       printf("Exiting...\n");
+  origin = node_to_street(&list, origin);
+  destination = node_to_street(&list, destination);
+  //DEBUG
+  //printf("origin node %s is in street %s\n", origin->name, node_to_street(&list, origin)->name);
+  //printf("destination node %s is in street %s\n", destination->name, node_to_street(&list, destination)->name);
+
 
 
   //if (origin && destination)

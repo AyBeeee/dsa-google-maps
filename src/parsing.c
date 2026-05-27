@@ -182,6 +182,9 @@ int load_streets(list_map *list) {
       newnode->name[i] = tolower(newnode->name[i]);
     }
     midpoint(newnode);
+    newnode->lat = newnode->street->midY;
+    newnode->lon = newnode->street->midX;
+
     // printf("midpoint x%f y%f\n", newnode->street->midX,
     // newnode->street->midY); //DEBUG
 
