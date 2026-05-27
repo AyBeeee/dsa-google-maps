@@ -3,34 +3,35 @@
 #include "structs.h"
 #include <stdio.h>
 
-
 // small util function to calculate which street our origin/destination
 // nodes fall into, to make the route calc slightly easier
-node *node_to_street(list_map *list, node *to_convert)
-{
-    double x = to_convert->lon;
-    double y = to_convert->lat;
+node *node_to_street(list_map *list, node *to_convert) {
+  double x = to_convert->lon;
+  double y = to_convert->lat;
 
+  /*node *temp = list->head_streets;
+  while (temp)
+  {
+      printf("X im at: %f, X from: %f, X to %f\n", x,
+  temp->street->from_intersection_lon, temp->street->to_intersection_lon);
+      printf("Y im at: %f, Y from: %f, Y to %f\n", y,
+  temp->street->from_intersection_lat, temp->street->to_intersection_lat);
+      printf("--- name of street im checking %s\n", temp->name);
+      if (((x >= temp->street->from_intersection_lon && x <=
+  temp->street->to_intersection_lon)
+          || (x >= temp->street->to_intersection_lon && x <=
+  temp->street->from_intersection_lon))
+          &&
+          ((y >= temp->street->from_intersection_lat && y <=
+  temp->street->to_intersection_lat)
+              || (y >= temp->street->to_intersection_lat && y <=
+  temp->street->from_intersection_lat))) return (temp);
 
-    /*node *temp = list->head_streets;
-    while (temp)
-    {
-        printf("X im at: %f, X from: %f, X to %f\n", x, temp->street->from_intersection_lon, temp->street->to_intersection_lon);
-        printf("Y im at: %f, Y from: %f, Y to %f\n", y, temp->street->from_intersection_lat, temp->street->to_intersection_lat);
-        printf("--- name of street im checking %s\n", temp->name);
-        if (((x >= temp->street->from_intersection_lon && x <= temp->street->to_intersection_lon)
-            || (x >= temp->street->to_intersection_lon && x <= temp->street->from_intersection_lon))
-            &&
-            ((y >= temp->street->from_intersection_lat && y <= temp->street->to_intersection_lat)
-                || (y >= temp->street->to_intersection_lat && y <= temp->street->from_intersection_lat)))
-            return (temp);
-
-        temp = temp->next;
-    }
-    printf("returning null\n");*/
-    return find_coordinate(list, x, y, false);
+      temp = temp->next;
+  }
+  printf("returning null\n");*/
+  return find_coordinate(list, x, y, false);
 }
-
 
 void read_long_input(char *buffer, int size) {
   int ch;
@@ -242,7 +243,7 @@ void init_queue(queue *q) {
   q->tail = NULL;
 }
 
-bool enqueue(queue *q, node *curr_node) {
+void enqueue(queue *q, node *curr_node) {
 
   node *newnode = malloc(sizeof(node));
   newnode->name = curr_node->name;
@@ -259,11 +260,9 @@ bool enqueue(queue *q, node *curr_node) {
     q->tail->next = newnode;
   }
   q->tail = newnode;
-
-  return true;
 }
 
-int dequeue(queue *q) {
+node *dequeue(queue *q) {
 
   node *curr = q->head;
 
@@ -281,14 +280,14 @@ int dequeue(queue *q) {
 }
 
 node *node_in_queue(queue *q, node *curr) {
-    node *temp = q->head;
+  node *temp = q->head;
 
-    while (temp != NULL) {
-        if (temp->street == curr->street) {
-            return temp;
-        }
-        temp = temp->next;
+  while (temp != NULL) {
+    if (temp->street == curr->street) {
+      return temp;
     }
+    temp = temp->next;
+  }
 
-    return NULL;
+  return NULL;
 }

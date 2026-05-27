@@ -1,6 +1,6 @@
 #ifndef STRUCTS_H
-# define STRUCTS_H
-# include <stdlib.h>
+#define STRUCTS_H
+#include <stdlib.h>
 
 enum nodetype { HOUSES, PLACES, STREETS };
 enum searchtype { ORIGIN, DESTINATION };
@@ -70,5 +70,12 @@ typedef struct {
   node *tail;
   int queue_size;
 } queue;
+
+typedef struct path_node {
+  node *street;
+  long long intersection_id;
+  struct path_node *parent;
+  struct path_node *next;
+} path_node;
 
 #endif

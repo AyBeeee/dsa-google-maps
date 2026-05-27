@@ -136,10 +136,10 @@ void test_find_intersection_and_add_street(list_map *list) {
   assert(find_intersection(graph, idx) == NULL);
 
   // add street to the bucket
-  add_street_to_intersection(graph, 10, &street_node);
+  add_street_to_intersection(graph, 10, street_node.lat, street_node.lon, &street_node);
 
   // find bucket based off the street
-  hashmap_entry *entry = find_intersection(graph, idx);
+  intersection *entry = find_intersection(graph, idx);
   assert(entry != NULL);
   assert(entry->intersection_id == 10);
   assert(entry->connected_streets != NULL);

@@ -27,23 +27,22 @@ void ask_map(list_map *list) {
     printf("Places loaded: %d\n", loaded_places);
     printf("Streets loaded: %d\n", loaded_streets);
     hashmap *graph = create_hashmap(list); // init hashmap, named graph
-    load_streets_into_graph(graph,
-                            list->head_streets); // load streets into the hashmap
+    load_streets_into_graph(
+        graph,
+        list->head_streets); // load streets into the hashmap
     list->graph = graph;
-  }
-  else {
+  } else {
     printf("Not found\n");
   }
 }
 
-//small wrapper for ask_node for the origin/destination
-node *ask(list_map *list, int stype)
-{
-    if (stype == ORIGIN)
-        printf("--- ORIGIN ---\n");
-    else if (stype == DESTINATION)
-        printf("--- DESTINATION ---\n");
-    return (ask_node(list));
+// small wrapper for ask_node for the origin/destination
+node *ask(list_map *list, int stype) {
+  if (stype == ORIGIN)
+    printf("--- ORIGIN ---\n");
+  else if (stype == DESTINATION)
+    printf("--- DESTINATION ---\n");
+  return (ask_node(list));
 }
 
 node *ask_node(list_map *list) { // pass the malloc from ask_map
