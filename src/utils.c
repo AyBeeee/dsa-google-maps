@@ -220,3 +220,41 @@ int LevenshteinDistance(char *a, char *b) {
   }
   return matrix[la][lb];
 }
+
+bool enqueue(queue *q, node *curr_node) {
+
+    node *newnode = malloc(sizeof(node));
+    newnode->name = curr_node->name;
+    newnode->lat = curr_node->lat;
+    newnode->lon = curr_node->lon;
+    newnode->street = curr_node->street;
+    newnode->next = NULL;
+
+    if(q->head == NULL) {
+        q->head = newnode;
+    }
+
+    if(q->tail != NULL) {
+        q->tail->next = newnode;
+    }
+    q->tail = newnode;
+
+    return true;
+}
+
+int dequeue(queue *q) {
+
+  node *curr = q->head;
+
+  if (q->head == NULL) {
+    return NULL;
+  }
+
+  q->head = q->head->next;
+
+  if (q->head == NULL) {
+      q->tail = NULL;
+  }
+
+  return curr;
+}

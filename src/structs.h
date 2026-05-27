@@ -65,4 +65,10 @@ typedef struct hashmap {
   int table_size;
 } hashmap;
 
+typedef struct {
+  node *head;
+  node *tail;
+  int queue_size;
+} queue;
+
 #endif
