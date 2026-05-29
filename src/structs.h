@@ -73,6 +73,7 @@ typedef struct {
 
 typedef struct path_node {
   node *street;
+  char *name;
   long long intersection_id;
   struct path_node *parent;
   struct path_node *next;

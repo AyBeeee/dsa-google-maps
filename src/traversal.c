@@ -11,8 +11,10 @@ void enqueue_path(path_node **head, path_node **tail, node *street,
   path_node *new_path = malloc(sizeof(path_node));
 
   new_path->street = street;
+  new_path->street->street = street->street;
   new_path->intersection_id = intersection_id;
   new_path->parent = parent;
+  new_path->name = street->name;
   new_path->next = NULL;
 
   if (*head == NULL) {
@@ -39,6 +41,24 @@ path_node *dequeue_path(path_node **head, path_node **tail) {
 
   curr->next = NULL;
   return curr;
+}
+
+void print_path(queue *path)
+{
+    node *from  = dequeue(path);
+    printf("Start at %s\n", from->name);
+    while (from && path)
+    {
+        node *to = dequeue(path);
+        if (cross_product(from, to) == LEFT)
+            printf("Turn left to ");
+        else
+            printf("Turn right to ");
+        printf("%s and continue for %dm\n", to->name, (int)to->street->length_meters);
+
+        from = to;
+    }
+    printf("You have arrived at your destination!\n");
 }
 
 long long next_intersection(node *street, long long current_intersection) {
@@ -81,8 +101,7 @@ queue *BFS(hashmap *graph, node *origin, node *destination) {
     path_node *curr_path = dequeue_path(&explore_head, &explore_tail);
     node *curr_street = curr_path->street;
 
-    if (curr_street->street == destination->street ||
-        strcmp(curr_street->name, destination->name) == 0) {
+    if (strcmp(curr_street->name, destination->name) == 0) {
       build_path(path, curr_path);
       return path;
     }
