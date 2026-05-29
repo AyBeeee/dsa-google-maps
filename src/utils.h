@@ -10,8 +10,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-enum turndirection { LEFT, RIGHT };
+enum turndirection { LEFT, RIGHT, STRAIGHT };
 
+char *capitalise(char *str);
 int LevenshteinDistance(char *a, char *b);
 void read_long_input(char *buffer, int size);
 void free_map(list_map *list);

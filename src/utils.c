@@ -23,6 +23,12 @@ int cross_product(node *from, node *to) {
   double Bx, By;
   double Cx, Cy;
 
+  //DEBUG
+  //printf("\n--------- CROSS PRODUCT between %s and %s. ", from->name, to->name);
+  //printf("\nfrom from = %lli, from to = %lli", from->street->from_intersection_id, from->street->to_intersection_id);
+  //printf("\nto from = %lli, to to = %lli\n", to->street->from_intersection_id, to->street->to_intersection_id);
+
+
   // situation 1: from.from -> from.to == to.from -> to.to
   if (from->street->to_intersection_id == to->street->from_intersection_id) {
     latlon_to_xy(from->street->from_intersection_lat,
@@ -85,12 +91,14 @@ int cross_product(node *from, node *to) {
                  to->street->from_intersection_lat,
                  to->street->from_intersection_lon, &Cx, &Cy);
   }
-  double result = (Bx - Ax) * (Cy - By) - (By - Ay) * (Cx - Bx);
+  double result = 0;
+  result = (Bx - Ax) * (Cy - By) - (By - Ay) * (Cx - Bx);
+//printf("RESULT IS VALUE %f\n", result);
   if (result > 0)
     return LEFT;
   else if (result < 0)
     return RIGHT;
-  return -1;
+  return STRAIGHT;
 }
 
 // small wrapper util function to calculate which street our origin/destination
