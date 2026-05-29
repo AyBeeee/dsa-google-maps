@@ -1,10 +1,12 @@
 #include "../src/hash.h"
 #include "../src/parsing.h"
 #include "../src/structs.h"
+#include "../src/utils.h"
 #include "utils.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 void test_house_parse_list(list_map *list);
@@ -19,6 +21,11 @@ void test_freeing_hashmap(list_map *list);
 void test_places_parse_list(list_map *list);
 void test_streets_parse_list(list_map *list);
 void free_map(list_map *list);
+void test_queue(queue *q, node *test_node);
+void test_bfs(void);
+void test_cross_product(void);
+void test_free_queue(void);
+queue *BFS(hashmap *graph, node *origin, node *destination);
 
 int main(void) {
 
@@ -37,8 +44,16 @@ int main(void) {
   printf("Test Hashmap Intersection Successful!\n");
   test_load_streets_into_graph(&list);
   test_find_intersection_and_add_street(&list);
-  test_freeing_hashmap(&list);
   printf("Lab 5 Unit Tests Passed!\n\n");
+
+  // LAB 6 UNIT TESTS
+  queue *q = malloc(sizeof(queue));
+  node *test_node = malloc(sizeof(node));
+  test_queue(q, test_node);
+  test_bfs();
+  test_freeing_hashmap(&list);
+  test_free_queue();
+  printf("Lab 6 Unit Tests Passed!\n\n");
 
   allsuccess();
 }
@@ -168,4 +183,125 @@ void test_freeing_hashmap(list_map *list) {
   assert(list->tail_streets == NULL);
 
   assert(list->graph == NULL);
+
+  printf("test free hashmap successful\n");
+}
+
+// ######################### UNIT TESTS FOR LAB 6 #########################
+
+void test_queue(queue *q, node *test_node) {
+
+  data_streets *test_street = malloc(sizeof(data_streets));
+
+  test_node->name = "test_node";
+  test_node->lat = 4.1023123;
+  test_node->lon = 2.1023123;
+  test_node->street = test_street;
+
+  init_queue(q);
+  enqueue(q, test_node);
+
+  assert(q->head->name == test_node->name);
+  assert(q->head->lat == test_node->lat);
+  assert(q->head->lon == test_node->lon);
+  assert(q->head->street == test_node->street);
+
+  printf("test queue successful\n");
+}
+
+void test_bfs(void) {
+  hashmap graph;
+  graph.table_size = 10;
+  graph.table = calloc(graph.table_size, sizeof(intersection *));
+  data_streets *from_street_data = malloc(sizeof(data_streets));
+  data_streets *to_street_data = malloc(sizeof(data_streets));
+
+  from_street_data->from_intersection_id = 1;
+  from_street_data->from_intersection_lat = 4.1023123;
+  from_street_data->from_intersection_lon = 2.1023123;
+  from_street_data->to_intersection_id = 2;
+  from_street_data->to_intersection_lat = 0;
+  from_street_data->to_intersection_lon = 0;
+  from_street_data->length_meters = 10;
+  from_street_data->midX = 0;
+  from_street_data->midY = 0;
+
+  to_street_data->from_intersection_id = 2;
+  to_street_data->from_intersection_lat = 4.1023123;
+  to_street_data->from_intersection_lon = 2.1023123;
+  to_street_data->to_intersection_id = 3;
+  to_street_data->to_intersection_lat = 0;
+  to_street_data->to_intersection_lon = 0;
+  to_street_data->length_meters = 10;
+  to_street_data->midX = 0;
+  to_street_data->midY = 0;
+
+  node *from_street = malloc(sizeof(node));
+  node *to_street = malloc(sizeof(node));
+
+  from_street->name = "from_street";
+  from_street->lat = 5.1023123;
+  from_street->lon = 3.1023123;
+  from_street->next = NULL;
+  from_street->house = NULL;
+  from_street->place = NULL;
+  from_street->street = from_street_data;
+
+  to_street->name = "to_street";
+  to_street->lat = 5.1023123;
+  to_street->lon = 3.1023123;
+  to_street->next = NULL;
+  to_street->house = NULL;
+  to_street->place = NULL;
+  to_street->street = to_street_data;
+
+  add_street_to_intersection(&graph, 1, 0, 0, from_street);
+  add_street_to_intersection(&graph, 2, 0, 0, from_street);
+
+  add_street_to_intersection(&graph, 2, 0, 0, to_street);
+  add_street_to_intersection(&graph, 3, 0, 0, to_street);
+
+  queue *path = BFS(&graph, from_street, to_street);
+
+  assert(path != NULL);
+  assert(path->head != NULL);
+  assert(strcmp(path->head->name, "from_street") == 0);
+  assert(path->head->next != NULL);
+  assert(strcmp(path->head->next->name, "to_street") == 0);
+
+  printf("Test bfs passed successfully\n");
+}
+
+void test_free_queue() {
+  queue *q = malloc(sizeof(queue));
+  node *test_node = malloc(sizeof(node));
+  data_streets *test_street = malloc(sizeof(data_streets));
+
+  test_street->from_intersection_id = 1;
+  test_street->to_intersection_id = 2;
+
+  test_node->name = "test_node";
+  test_node->lat = 0;
+  test_node->lon = 0;
+  test_node->next = NULL;
+  test_node->house = NULL;
+  test_node->place = NULL;
+  test_node->street = test_street;
+
+  init_queue(q);
+  enqueue(q, test_node);
+
+  node *removed = dequeue(q);
+
+  assert(removed != NULL);
+  assert(strcmp(removed->name, "test_node") == 0);
+  assert(q->head == NULL);
+  assert(q->tail == NULL);
+
+  free(removed);
+  free(test_node);
+  free(test_street);
+  free(q);
+
+  printf("Test free queue passed successfully\n");
 }
