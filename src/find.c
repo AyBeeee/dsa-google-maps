@@ -6,13 +6,13 @@ node *find_coordinate(list_map *list, double x_target, double y_target, bool ver
 
   node *curr = list->head_streets;
   node *best_match = NULL;
-  int best_dist = INT_MAX;
+  double best_dist = INT_MAX;
   for (int i = 0; i < list->size_streets; i++) {
 
-    int dist =
+      double dist =
         haversine(curr->street->midX, curr->street->midY, x_target, y_target);
 
-    // printf("dist calculated is: %i\n", dist); //DEBUG
+    //printf("dist calculated is: %f\n", dist); //DEBUG
     if (dist < best_dist) {
       best_dist = dist;
       best_match = curr;

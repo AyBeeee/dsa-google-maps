@@ -9,30 +9,42 @@ int hash_intersection(hashmap *hash, long long intersection_id) {
   return (int)(intersection_id % hash->table_size);
 }
 
-// count the amount of unique intersection_id variables, to size the hashmap
-// correctly
+//helper function tells us if id is already present in the intersections list
+bool intersection_seen(long long *intersections, int num_unique,
+                              long long intersection_id) {
+  for (int i = 0; i < num_unique; i++) {
+    if (intersections[i] == intersection_id)
+      return true;
+  }
+  return false;
+}
+
+//helper function to add the given id only if not present in the list already
+void add_intersection_if_new(long long *intersections, int *num_unique,
+                                    long long intersection_id) {
+  if (!intersection_seen(intersections, *num_unique, intersection_id))
+    intersections[(*num_unique)++] = intersection_id;
+}
+
+// count unique intersection ids (both from and to) to size the hashmap
 int unique_intersections(list_map *list) {
+
   node *head = list->head_streets;
-  int *intersections = malloc(list->size_streets * sizeof(int));
-  for (int i = 0; i < list->size_streets; i++)
-    intersections[i] = -1;
+  int max_intersections = list->size_streets * 2; //worst case all from & to are diff
+  long long *intersections = malloc(max_intersections * sizeof(long long));
   int num_unique = 0;
 
-  while (head) {
-    int i = 0;
-    for (i = i; i < list->size_streets && i >= 0; i++)
-      if (head->street->from_intersection_id == intersections[i]) {
-        i = -42;
-        break;
-      }
-    if (i != -42)
-      intersections[num_unique++] = head->street->from_intersection_id;
-
+  while (head)
+  {
+    add_intersection_if_new(intersections, &num_unique,
+                            head->street->from_intersection_id);
+    add_intersection_if_new(intersections, &num_unique,
+                            head->street->to_intersection_id);
     head = head->next;
   }
+
   free(intersections);
-  printf("%i\n", num_unique);
-  return (num_unique);
+  return num_unique;
 }
 
 // initialize hashmap with buckets as NULL
@@ -51,30 +63,12 @@ hashmap *create_hashmap(list_map *list) {
   return graph;
 }
 
-// Find existing intersection in a bucket by going through the list
-
-intersection *find_intersection(hashmap *graph, int index) {
-
-  intersection *current = graph->table[index]; // current element in the bucket,
-                                               // starting at the first one
-
-  while (current != NULL) {
-    if (current->next == NULL)
-      return current;
-    // printf("current intersection id is %lli\n", current->intersection_id);
-    // DEBUG
-    current = current->next;
-  }
-
-  return NULL;
-}
-
 void add_street_to_intersection(hashmap *graph, long long intersection_id,
                                 double intersection_lat,
                                 double intersection_lon, node *curr) {
 
   int index = hash_intersection(graph, intersection_id); // find index bucket
-  intersection *entry = find_intersection(graph, index);
+  intersection *entry = in_intersection(graph, index, intersection_id);
   // if the bucket is null, create the bucket
   if (entry == NULL) {
     entry = malloc(sizeof(intersection));

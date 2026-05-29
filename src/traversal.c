@@ -43,13 +43,25 @@ path_node *dequeue_path(path_node **head, path_node **tail) {
   return curr;
 }
 
-void print_path(queue *path)
+void print_path(queue *path, node *origin, node *destination)
 {
-    node *from  = dequeue(path);
-    printf("Start at %s\n", from->name);
-    while (from && path)
+    printf("Start at %s\n", origin->name);
+    node *from = dequeue(path);
+    if (!from)
+        printf("Your origin and destination are on the same street lol\n");
+    else
+    {
+        if (cross_product(origin, from) == LEFT)
+            printf("Turn left to ");
+        else
+            printf("Turn right to ");
+        printf("%s and continue for %dm\n", from->name, (int)from->street->length_meters);
+    }
+    while (path && from)
     {
         node *to = dequeue(path);
+        if (!to)
+            break ;
         if (cross_product(from, to) == LEFT)
             printf("Turn left to ");
         else
@@ -58,7 +70,7 @@ void print_path(queue *path)
 
         from = to;
     }
-    printf("You have arrived at your destination!\n");
+    printf("You have arrived at %s!\n", destination->name);
 }
 
 long long next_intersection(node *street, long long current_intersection) {
@@ -74,6 +86,7 @@ void build_path(queue *path, path_node *curr) {
     return;
   }
 
+  //rintf("curr in build path is %s\n", curr->name);
   // build path in a recursive way by enqueueing
   build_path(path, curr->parent);
   enqueue(path, curr->street);
