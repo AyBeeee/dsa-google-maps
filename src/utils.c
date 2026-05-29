@@ -4,6 +4,19 @@
 #include "structs.h"
 #include <stdio.h>
 
+int is_prime(int n) {
+  if (n < 2)
+    return 0;
+
+  int last = (int)sqrt(n) + 1; /* conservatively safe */
+
+  for (int j = 2; j <= last; ++j)
+    if (0 == n % j)
+      return 0;
+
+  return 1;
+}
+
 // converts latlon to x and y coords (grabbed from problem.md)
 // i assume lat/lon_ref is the point we want to center our grid around
 void latlon_to_xy(double lat_ref, double lon_ref, double lat, double lon,
@@ -17,18 +30,19 @@ void latlon_to_xy(double lat_ref, double lon_ref, double lat, double lon,
 
 // Given two neighbouring streets, AB and BC,
 // we can use the cross product AB x BC = (Bx-Ax)*(Cy-By)-(By-Ay)*(Cx-Bx) to
-// determine whether the street turns left (> 0) or right (< 0). util function
-// to figure out whether the user needs to turn left or right
+// determine whether the street turns left (> 0) or right (< 0).
+// im sorry this is so ugly :sob:
 int cross_product(node *from, node *to) {
   double Ax, Ay;
   double Bx, By;
   double Cx, Cy;
 
-  //DEBUG
-  //printf("\n--------- CROSS PRODUCT between %s and %s. ", from->name, to->name);
-  //printf("\nfrom from = %lli, from to = %lli", from->street->from_intersection_id, from->street->to_intersection_id);
-  //printf("\nto from = %lli, to to = %lli\n", to->street->from_intersection_id, to->street->to_intersection_id);
-
+  // DEBUG
+  // printf("\n--------- CROSS PRODUCT between %s and %s. ", from->name,
+  // to->name); printf("\nfrom from = %lli, from to = %lli",
+  // from->street->from_intersection_id, from->street->to_intersection_id);
+  // printf("\nto from = %lli, to to = %lli\n",
+  // to->street->from_intersection_id, to->street->to_intersection_id);
 
   // situation 1: from.from -> from.to == to.from -> to.to
   if (from->street->to_intersection_id == to->street->from_intersection_id) {
@@ -94,7 +108,7 @@ int cross_product(node *from, node *to) {
   }
   double result = 0;
   result = (Bx - Ax) * (Cy - By) - (By - Ay) * (Cx - Bx);
-//printf("RESULT IS VALUE %f\n", result);
+  // printf("RESULT IS VALUE %f\n", result);
   if (result > 0)
     return LEFT;
   else if (result < 0)
@@ -129,29 +143,40 @@ void read_long_input(char *buffer, int size) {
   }
 }
 
-void free_hash(hashmap *graph)
-{
-    if (graph)
-    {
-      for (int i = 0; i < graph->table_size; i++) {
-        if (graph->table[i] != NULL) {
-          // printf("delete: %lli\n", list->graph->table[i]->intersection_id);
-          // DEBUG
+void free_explore_path(path_node *head) {
+  path_node *temp;
+  while (head) {
+    printf("hello im freeing\n");
+    temp = head->next;
+    free(head);
+    head = temp;
+  }
+}
 
-          node *head = graph->table[i]->connected_streets;
-          node *temp = NULL;
-          while (head) {
-            temp = head->next;
-            free(head);
-            head = temp;
-            // printf("delete inside: %i\n", j++); DEBUG
-          }
+void free_hash(hashmap *graph) {
+  if (graph) {
+    for (int i = 0; i < graph->table_size; i++) {
+      intersection *current = graph->table[i];
+      while (current != NULL) { // walk the collision chain
+        intersection *next_intersection = current->next;
+        // printf("delete: %lli at index %i\n", current->intersection_id, i);
+        // //DEBUG
+
+        node *head = current->connected_streets;
+        node *temp = NULL;
+        while (head) {
+          temp = head->next;
+          free(head);
+          head = temp;
+          // printf("delete inside: %i\n", j++); //DEBUG
         }
-        free(graph->table[i]);
+        free(current);
+        current = next_intersection;
       }
-      free(graph->table);
-      free(graph);
     }
+    free(graph->table);
+    free(graph);
+  }
 }
 
 void free_map(list_map *list) {
@@ -363,27 +388,27 @@ node *dequeue(queue *q) {
   return curr;
 }
 
-
-//helper function to make the BFS the tiniest bit less ugly
-// checks indiscriminately from and to ids to save lines
-int node_in_visited(hashmap *visited, node *curr)
-{
+// helper function to make the BFS the tiniest bit less ugly
+//  checks indiscriminately from and to ids to save lines
+int node_in_visited(hashmap *visited, node *curr) {
   int missing = 0;
-  int from_index = hash_intersection(visited, curr->street->from_intersection_id);
+  int from_index =
+      hash_intersection(visited, curr->street->from_intersection_id);
   int to_index = hash_intersection(visited, curr->street->to_intersection_id);
 
-  if (in_intersection(visited, from_index, curr->street->from_intersection_id) == NULL)
-      missing++;
+  if (in_intersection(visited, from_index,
+                      curr->street->from_intersection_id) == NULL)
+    missing++;
 
-  if (in_intersection(visited, to_index, curr->street->to_intersection_id) == NULL)
-  {
-      if (missing)
-          return BOTH;
-      else
-          return TO;
+  if (in_intersection(visited, to_index, curr->street->to_intersection_id) ==
+      NULL) {
+    if (missing)
+      return BOTH;
+    else
+      return TO;
   }
   if (missing)
-      return FROM;
+    return FROM;
   return NONE;
 }
 

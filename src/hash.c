@@ -4,12 +4,20 @@
 #include "utils.h"
 #include <string.h>
 
+// apparently using prime numbers as table size reduces collision
+int closest_prime(int start) {
+  while (!is_prime(start))
+    start++;
+  return start;
+}
+
 // hash function
 int hash_intersection(hashmap *hash, long long intersection_id) {
   return (int)(intersection_id % hash->table_size);
 }
 
-// helper function tells us if id is already present in the intersections list
+// helper function tells us if given id is already present in the intersections
+// list
 bool intersection_seen(long long *intersections, int num_unique,
                        long long intersection_id) {
   for (int i = 0; i < num_unique; i++) {
@@ -19,16 +27,16 @@ bool intersection_seen(long long *intersections, int num_unique,
   return false;
 }
 
-// helper function to add the given id only if not present in the list already
+// helper function to add the given id only if not present in the intersections
+// list already
 void add_intersection_if_new(long long *intersections, int *num_unique,
                              long long intersection_id) {
   if (!intersection_seen(intersections, *num_unique, intersection_id))
     intersections[(*num_unique)++] = intersection_id;
 }
 
-// count unique intersection ids (both from and to) to size the hashmap
+// count unique intersection ids (both from and to ids) to size the hashmap
 int unique_intersections(list_map *list) {
-
   node *head = list->head_streets;
   int max_intersections =
       list->size_streets * 2; // worst case all from & to are diff
@@ -51,14 +59,15 @@ int unique_intersections(list_map *list) {
 hashmap *create_hashmap(list_map *list) {
 
   hashmap *graph = malloc(sizeof(hashmap));
-  graph->table_size = unique_intersections(list);
-  graph->table = malloc(graph->table_size * sizeof(intersection));
-  if (graph->table == NULL)
+  graph->table_size = closest_prime(unique_intersections(list));
+  graph->table = malloc(graph->table_size * sizeof(intersection *));
+  if (graph->table == NULL) {
+    free(graph);
     return NULL;
-
-  for (int i = 0; i < graph->table_size; i++) {
-    graph->table[i] = NULL;
   }
+
+  for (int i = 0; i < graph->table_size; i++)
+    graph->table[i] = NULL;
 
   return graph;
 }
@@ -81,15 +90,14 @@ void add_street_to_intersection(hashmap *graph, long long intersection_id,
     entry->intersection_lat = intersection_lat;
     entry->intersection_lon = intersection_lon;
     graph->table[index] = entry;
-    //printf("--- INDEX NEW BUCKET AT %i\n", index); //DEBUG
+    // printf("--- INDEX NEW BUCKET AT %i\n", index); //DEBUG
   }
 
   // if the bucket is not null, add the new node connected to the element in the
   // bucket since the streets will be connected
   node *new_node = malloc(sizeof(node));
-  if (new_node == NULL) {
+  if (new_node == NULL)
     return;
-  }
 
   new_node->name = curr->name;
   new_node->street = curr->street;
@@ -100,11 +108,10 @@ void add_street_to_intersection(hashmap *graph, long long intersection_id,
   new_node->next = entry->connected_streets;
 
   entry->connected_streets = new_node;
-  //printf("just added %s to graph\n", new_node->name); //DEBUG
+  // printf("just added %s to graph\n", new_node->name); //DEBUG
 }
 
 // Load streets into the hashmap
-
 void load_streets_into_graph(hashmap *graph, node *head_streets) {
 
   node *curr = head_streets;

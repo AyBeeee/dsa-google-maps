@@ -51,7 +51,6 @@ int main() {
     return 0;
   }
 
-
   print_path(path, origin, destination);
   // DEBUG
   // printf("origin node %s is in street %s\n", origin->name,

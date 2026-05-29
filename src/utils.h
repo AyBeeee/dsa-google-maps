@@ -11,7 +11,7 @@
 #include <string.h>
 
 enum turndirection { LEFT, RIGHT, STRAIGHT };
-enum idmissing {FROM, TO, BOTH, NONE};
+enum idmissing { FROM, TO, BOTH, NONE };
 
 char *capitalise(char *str);
 int LevenshteinDistance(char *a, char *b);
@@ -32,6 +32,7 @@ node *dequeue(queue *q);
 int node_in_visited(hashmap *visited, node *curr);
 int cross_product(node *from, node *to);
 void free_hash(hashmap *graph);
-
+int is_prime(int n);
+void free_explore_path(path_node *head);
 
 #endif
