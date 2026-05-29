@@ -43,22 +43,21 @@ path_node *dequeue_path(path_node **head, path_node **tail) {
   return curr;
 }
 
-void print_path(queue *path)
-{
-    node *from  = dequeue(path);
-    printf("Start at %s\n", from->name);
-    while (from && path)
-    {
-        node *to = dequeue(path);
-        if (cross_product(from, to) == LEFT)
-            printf("Turn left to ");
-        else
-            printf("Turn right to ");
-        printf("%s and continue for %dm\n", to->name, (int)to->street->length_meters);
+void print_path(queue *path) {
+  node *from = dequeue(path);
+  printf("Start at %s\n", from->name);
+  while (from && path) {
+    node *to = dequeue(path);
+    if (cross_product(from, to) == LEFT)
+      printf("Turn left to ");
+    else
+      printf("Turn right to ");
+    printf("%s and continue for %dm\n", to->name,
+           (int)to->street->length_meters);
 
-        from = to;
-    }
-    printf("You have arrived at your destination!\n");
+    from = to;
+  }
+  printf("You have arrived at your destination!\n");
 }
 
 long long next_intersection(node *street, long long current_intersection) {

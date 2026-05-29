@@ -5,95 +5,102 @@
 
 // converts latlon to x and y coords (grabbed from problem.md)
 // i assume lat/lon_ref is the point we want to center our grid around
-void latlon_to_xy(double lat_ref, double lon_ref,
-                  double lat, double lon,
+void latlon_to_xy(double lat_ref, double lon_ref, double lat, double lon,
                   double *x, double *y) {
-    double lat_ref_rad = toRadians(lat_ref);
-    double dlat = toRadians(lat - lat_ref);
-    double dlon = toRadians(lon - lon_ref);
-    *x = EARTH_RADIUS * dlon * cos(lat_ref_rad);
-    *y = EARTH_RADIUS * dlat;
+  double lat_ref_rad = toRadians(lat_ref);
+  double dlat = toRadians(lat - lat_ref);
+  double dlon = toRadians(lon - lon_ref);
+  *x = EARTH_RADIUS * dlon * cos(lat_ref_rad);
+  *y = EARTH_RADIUS * dlat;
 }
 
 // Given two neighbouring streets, AB and BC,
-// we can use the cross product AB x BC = (Bx-Ax)*(Cy-By)-(By-Ay)*(Cx-Bx) to determine whether the street turns left (> 0) or right (< 0).
-// util function to figure out whether the user needs to turn left or right
-int cross_product(node *from, node *to)
-{
-    double Ax, Ay;
-    double Bx, By;
-    double Cx, Cy;
+// we can use the cross product AB x BC = (Bx-Ax)*(Cy-By)-(By-Ay)*(Cx-Bx) to
+// determine whether the street turns left (> 0) or right (< 0). util function
+// to figure out whether the user needs to turn left or right
+int cross_product(node *from, node *to) {
+  double Ax, Ay;
+  double Bx, By;
+  double Cx, Cy;
 
-    // situation 1: from.from -> from.to == to.from -> to.to
-    if (from->street->to_intersection_id == to->street->from_intersection_id)
-    {
-        latlon_to_xy(from->street->from_intersection_lat, from->street->from_intersection_lon,
-            from->street->from_intersection_lat, from->street->from_intersection_lon,
-            &Ax, &Ay);
-        latlon_to_xy(from->street->from_intersection_lat, from->street->from_intersection_lon,
-            from->street->to_intersection_lat, from->street->to_intersection_lon,
-            &Bx, &By);
-        latlon_to_xy(from->street->from_intersection_lat, from->street->from_intersection_lon,
-            to->street->to_intersection_lat, to->street->to_intersection_lon,
-            &Cx, &Cy);
-    }
-    //situation 2: from.to -> from.from == to.from -> to.to
-    else if (from->street->from_intersection_id == to->street->from_intersection_id)
-    {
-        latlon_to_xy(from->street->to_intersection_lat, from->street->to_intersection_lon,
-            from->street->to_intersection_lat, from->street->to_intersection_lon,
-            &Ax, &Ay);
-        latlon_to_xy(from->street->to_intersection_lat, from->street->to_intersection_lon,
-            from->street->from_intersection_lat, from->street->from_intersection_lon,
-            &Bx, &By);
-        latlon_to_xy(from->street->to_intersection_lat, from->street->to_intersection_lon,
-            to->street->to_intersection_lat, to->street->to_intersection_lon,
-            &Cx, &Cy);
-    }
-    //situation 3: from.to -> from.from == to.to -> to.from
-    else if (from->street->from_intersection_id == to->street->to_intersection_id)
-    {
-        latlon_to_xy(from->street->to_intersection_lat, from->street->to_intersection_lon,
-            from->street->to_intersection_lat, from->street->to_intersection_lon,
-            &Ax, &Ay);
-        latlon_to_xy(from->street->to_intersection_lat, from->street->to_intersection_lon,
-            from->street->from_intersection_lat, from->street->from_intersection_lon,
-            &Bx, &By);
-        latlon_to_xy(from->street->to_intersection_lat, from->street->to_intersection_lon,
-            to->street->from_intersection_lat, to->street->from_intersection_lon,
-            &Cx, &Cy);
-    }
-    //situation 4: from.from -> from.to == to.to -> to.from
-    else if (from->street->to_intersection_id == to->street->to_intersection_id)
-    {
-        latlon_to_xy(from->street->from_intersection_lat, from->street->from_intersection_lon,
-            from->street->from_intersection_lat, from->street->from_intersection_lon,
-            &Ax, &Ay);
-        latlon_to_xy(from->street->from_intersection_lat, from->street->from_intersection_lon,
-            from->street->to_intersection_lat, from->street->to_intersection_lon,
-            &Bx, &By);
-        latlon_to_xy(from->street->from_intersection_lat, from->street->from_intersection_lon,
-            to->street->from_intersection_lat, to->street->from_intersection_lon,
-            &Cx, &Cy);
-    }
-    double result = (Bx-Ax)*(Cy-By)-(By-Ay)*(Cx-Bx);
-    if (result > 0)
-        return LEFT;
-    else if (result < 0)
-        return RIGHT;
-    return -1;
+  // situation 1: from.from -> from.to == to.from -> to.to
+  if (from->street->to_intersection_id == to->street->from_intersection_id) {
+    latlon_to_xy(from->street->from_intersection_lat,
+                 from->street->from_intersection_lon,
+                 from->street->from_intersection_lat,
+                 from->street->from_intersection_lon, &Ax, &Ay);
+    latlon_to_xy(from->street->from_intersection_lat,
+                 from->street->from_intersection_lon,
+                 from->street->to_intersection_lat,
+                 from->street->to_intersection_lon, &Bx, &By);
+    latlon_to_xy(from->street->from_intersection_lat,
+                 from->street->from_intersection_lon,
+                 to->street->to_intersection_lat,
+                 to->street->to_intersection_lon, &Cx, &Cy);
+  }
+  // situation 2: from.to -> from.from == to.from -> to.to
+  else if (from->street->from_intersection_id ==
+           to->street->from_intersection_id) {
+    latlon_to_xy(from->street->to_intersection_lat,
+                 from->street->to_intersection_lon,
+                 from->street->to_intersection_lat,
+                 from->street->to_intersection_lon, &Ax, &Ay);
+    latlon_to_xy(from->street->to_intersection_lat,
+                 from->street->to_intersection_lon,
+                 from->street->from_intersection_lat,
+                 from->street->from_intersection_lon, &Bx, &By);
+    latlon_to_xy(from->street->to_intersection_lat,
+                 from->street->to_intersection_lon,
+                 to->street->to_intersection_lat,
+                 to->street->to_intersection_lon, &Cx, &Cy);
+  }
+  // situation 3: from.to -> from.from == to.to -> to.from
+  else if (from->street->from_intersection_id ==
+           to->street->to_intersection_id) {
+    latlon_to_xy(from->street->to_intersection_lat,
+                 from->street->to_intersection_lon,
+                 from->street->to_intersection_lat,
+                 from->street->to_intersection_lon, &Ax, &Ay);
+    latlon_to_xy(from->street->to_intersection_lat,
+                 from->street->to_intersection_lon,
+                 from->street->from_intersection_lat,
+                 from->street->from_intersection_lon, &Bx, &By);
+    latlon_to_xy(from->street->to_intersection_lat,
+                 from->street->to_intersection_lon,
+                 to->street->from_intersection_lat,
+                 to->street->from_intersection_lon, &Cx, &Cy);
+  }
+  // situation 4: from.from -> from.to == to.to -> to.from
+  else if (from->street->to_intersection_id == to->street->to_intersection_id) {
+    latlon_to_xy(from->street->from_intersection_lat,
+                 from->street->from_intersection_lon,
+                 from->street->from_intersection_lat,
+                 from->street->from_intersection_lon, &Ax, &Ay);
+    latlon_to_xy(from->street->from_intersection_lat,
+                 from->street->from_intersection_lon,
+                 from->street->to_intersection_lat,
+                 from->street->to_intersection_lon, &Bx, &By);
+    latlon_to_xy(from->street->from_intersection_lat,
+                 from->street->from_intersection_lon,
+                 to->street->from_intersection_lat,
+                 to->street->from_intersection_lon, &Cx, &Cy);
+  }
+  double result = (Bx - Ax) * (Cy - By) - (By - Ay) * (Cx - Bx);
+  if (result > 0)
+    return LEFT;
+  else if (result < 0)
+    return RIGHT;
+  return -1;
 }
 
 // small wrapper util function to calculate which street our origin/destination
 // nodes fall into, to make the route calc slightly easier
-node *node_to_street(list_map *list, node *to_convert)
-{
-    double x = to_convert->lon;
-    double y = to_convert->lat;
+node *node_to_street(list_map *list, node *to_convert) {
+  double x = to_convert->lon;
+  double y = to_convert->lat;
 
-    return find_coordinate(list, x, y, false);
+  return find_coordinate(list, x, y, false);
 }
-
 
 void read_long_input(char *buffer, int size) {
   int ch;
