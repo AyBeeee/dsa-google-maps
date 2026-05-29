@@ -148,14 +148,14 @@ void test_find_intersection_and_add_street(list_map *list) {
 
   // test idx
   int idx = hash_intersection(graph, 10);
-  assert(find_intersection(graph, idx) == NULL);
+  assert(in_intersection(graph, idx, street_data.from_intersection_id) == NULL);
 
   // add street to the bucket
   add_street_to_intersection(graph, 10, street_node.lat, street_node.lon,
                              &street_node);
 
   // find bucket based off the street
-  intersection *entry = find_intersection(graph, idx);
+  intersection *entry = in_intersection(graph, idx, street_data.from_intersection_id);
   assert(entry != NULL);
   assert(entry->intersection_id == 10);
   assert(entry->connected_streets != NULL);
