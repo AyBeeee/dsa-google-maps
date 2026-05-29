@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "hash.h"
 #include "main.h"
 #include "structs.h"
 #include <stdio.h>
@@ -128,6 +129,31 @@ void read_long_input(char *buffer, int size) {
   }
 }
 
+void free_hash(hashmap *graph)
+{
+    if (graph)
+    {
+      for (int i = 0; i < graph->table_size; i++) {
+        if (graph->table[i] != NULL) {
+          // printf("delete: %lli\n", list->graph->table[i]->intersection_id);
+          // DEBUG
+
+          node *head = graph->table[i]->connected_streets;
+          node *temp = NULL;
+          while (head) {
+            temp = head->next;
+            free(head);
+            head = temp;
+            // printf("delete inside: %i\n", j++); DEBUG
+          }
+        }
+        free(graph->table[i]);
+      }
+      free(graph->table);
+      free(graph);
+    }
+}
+
 void free_map(list_map *list) {
   node *temp;
   while (list->head_houses) {
@@ -160,26 +186,7 @@ void free_map(list_map *list) {
   list->head_streets = NULL;
   list->tail_streets = NULL;
 
-  if (list->graph) {
-    for (int i = 0; i < list->graph->table_size; i++) {
-      if (list->graph->table[i] != NULL) {
-        // printf("delete: %lli\n", list->graph->table[i]->intersection_id);
-        // DEBUG
-
-        node *head = list->graph->table[i]->connected_streets;
-        node *temp = NULL;
-        while (head) {
-          temp = head->next;
-          free(head);
-          head = temp;
-          // printf("delete inside: %i\n", j++); DEBUG
-        }
-      }
-      free(list->graph->table[i]);
-    }
-    free(list->graph->table);
-    free(list->graph);
-  }
+  free_hash(list->graph);
   list->graph = NULL;
 }
 
@@ -356,7 +363,31 @@ node *dequeue(queue *q) {
   return curr;
 }
 
-node *node_in_queue(queue *q, node *curr) {
+
+//helper function to make the BFS the tiniest bit less ugly
+// checks indiscriminately from and to ids to save lines
+int node_in_visited(hashmap *visited, node *curr)
+{
+  int missing = 0;
+  int from_index = hash_intersection(visited, curr->street->from_intersection_id);
+  int to_index = hash_intersection(visited, curr->street->to_intersection_id);
+
+  if (in_intersection(visited, from_index, curr->street->from_intersection_id) == NULL)
+      missing++;
+
+  if (in_intersection(visited, to_index, curr->street->to_intersection_id) == NULL)
+  {
+      if (missing)
+          return BOTH;
+      else
+          return TO;
+  }
+  if (missing)
+      return FROM;
+  return NONE;
+}
+
+node *node_in_queue_old(queue *q, node *curr) {
   node *temp = q->head;
 
   while (temp != NULL) {

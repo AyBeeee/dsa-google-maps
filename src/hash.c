@@ -81,7 +81,7 @@ void add_street_to_intersection(hashmap *graph, long long intersection_id,
     entry->intersection_lat = intersection_lat;
     entry->intersection_lon = intersection_lon;
     graph->table[index] = entry;
-    // printf("--- INDEX NEW BUCKET AT %i\n", index); DEBUG
+    //printf("--- INDEX NEW BUCKET AT %i\n", index); //DEBUG
   }
 
   // if the bucket is not null, add the new node connected to the element in the
@@ -100,6 +100,7 @@ void add_street_to_intersection(hashmap *graph, long long intersection_id,
   new_node->next = entry->connected_streets;
 
   entry->connected_streets = new_node;
+  //printf("just added %s to graph\n", new_node->name); //DEBUG
 }
 
 // Load streets into the hashmap
