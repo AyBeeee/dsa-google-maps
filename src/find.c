@@ -10,10 +10,10 @@ node *find_coordinate(list_map *list, double x_target, double y_target,
   double best_dist = INT_MAX;
   for (int i = 0; i < list->size_streets; i++) {
 
-      double dist =
-        haversine(curr->street->midX, curr->street->midY, x_target, y_target);
+    double dist =
+        haversine(curr->street->midY, curr->street->midX, y_target, x_target);
 
-    //printf("dist calculated is: %f\n", dist); //DEBUG
+    // printf("dist calculated is: %f\n", dist); //DEBUG
     if (dist < best_dist) {
       best_dist = dist;
       best_match = curr;
@@ -56,7 +56,7 @@ node *find_node(list_map *list, char *street, int ntype) {
   }
 
   node *best_match = NULL; // init best match
-  int best_dist = 7;
+  int best_dist = INT_MAX;
   int threshold = 7;
   int street_found = 0;
   char *matched_street = street;
@@ -156,7 +156,7 @@ node *find_node(list_map *list, char *street, int ntype) {
     printf("We couldn't find the address, did you mean: %s [Y-N]\n",
            best_match->name);
     scanf(" %c", &choice);
-    if (choice == 'Y') {
+    if (choice == 'Y' || choice == 'y') {
       printf("Found at %lf | %lf\n", best_match->lat, best_match->lon);
       return best_match;
       return best_match;
@@ -172,9 +172,9 @@ node *find_node(list_map *list, char *street, int ntype) {
     int best_num_dist = INT_MAX;
     node *best_num_match = NULL;
 
-    printf("Valid numbers in %s: ", matched_street);
-
     snprintf(num_str, sizeof(num_str), "%d", num);
+
+    printf("Valid numbers in %s: ", matched_street);
 
     curr = list->head_houses;
     while (curr != NULL) {

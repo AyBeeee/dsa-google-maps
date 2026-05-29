@@ -42,7 +42,7 @@ int load_houses(list_map *list) {
     // calloc between beginning of string and first comma
     newnode->name = calloc(
         findnchar(line, ',', 1) - findnchar(line, ',', 0) + 1, sizeof(char));
-    sscanf(line, "%49[^,],%d,%lf,%lf", newnode->name, &(newnode->house->num),
+    sscanf(line, "%255[^,],%d,%lf,%lf", newnode->name, &(newnode->house->num),
            &newnode->lat, &newnode->lon);
 
     for (int i = 0; i < (int)strlen(newnode->name); i++) {
@@ -105,7 +105,7 @@ int load_places(list_map *list) {
     // comma characters)
     newnode->name = calloc(
         findnchar(line, ',', 2) - findnchar(line, ',', 1) + 1, sizeof(char));
-    sscanf(line, "%49[^,],%[^,],%49[^,],%lf,%lf", newnode->place->id,
+    sscanf(line, "%255[^,],%[^,],%255[^,],%lf,%lf", newnode->place->id,
            newnode->name, newnode->place->amenity, &newnode->lat,
            &newnode->lon);
     // printf("parsed and saved %s, %s, %s, %f, %f\n", newnode->place->id,
@@ -169,7 +169,7 @@ int load_streets(list_map *list) {
     // calloc between the end of the line and seventh comma
     newnode->name =
         calloc(strlen(line) - findnchar(line, ',', 7) + 1, sizeof(char));
-    sscanf(line, "%lld, %lf, %lf, %lld, %lf, %lf, %lf, %49[^\n]",
+    sscanf(line, "%lld, %lf, %lf, %lld, %lf, %lf, %lf, %255[^\n]",
            &newnode->street->from_intersection_id,
            &newnode->street->from_intersection_lat,
            &newnode->street->from_intersection_lon,
