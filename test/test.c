@@ -2,6 +2,7 @@
 #include "../src/parsing.h"
 #include "../src/structs.h"
 #include "utils.h"
+#include "hash.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -37,8 +38,18 @@ int main(void) {
   printf("Test Hashmap Intersection Successful!\n");
   test_load_streets_into_graph(&list);
   test_find_intersection_and_add_street(&list);
-  test_freeing_hashmap(&list);
   printf("Lab 5 Unit Tests Passed!\n\n");
+
+  // LAB 6 UNIT TESTS
+  queue *q = malloc(sizeof(queue));
+  node *test_node = malloc(sizeof(node));
+  test_queue(q, test_node);
+  test_bfs();
+
+
+  test_freeing_hashmap(&list);
+
+
 
   allsuccess();
 }
@@ -168,4 +179,85 @@ void test_freeing_hashmap(list_map *list) {
   assert(list->tail_streets == NULL);
 
   assert(list->graph == NULL);
+}
+
+
+// ######################### UNIT TESTS FOR LAB 6 #########################
+
+void test_queue(queue *q, node *test_node) {
+  test_node->name = "test_node";
+  test_node->lat = 4.1023123;
+  test_node->lon = 2.1023123;
+  test_node->street = "Carrer test node";
+
+  init_queue(q);
+
+  enqueue(q, test_node);
+
+  assert(q->head->name = test_node->name);
+  assert(q->head->lat = test_node->lat);
+  assert(q->head->lon = test_node->lon);
+  assert(q->head->street = test_node->street);
+}
+
+void test_bfs(void) {
+  hashmap graph;
+  graph.table_size = 10;
+  graph.table = calloc(graph.table_size, sizeof(intersection *));
+
+  data_streets *ab = malloc(sizeof(data_streets));
+  data_streets *bc = malloc(sizeof(data_streets));
+
+  ab->from_intersection_id = 1;
+  ab->from_intersection_lat = 0;
+  ab->from_intersection_lon = 0;
+  ab->to_intersection_id = 2;
+  ab->to_intersection_lat = 0;
+  ab->to_intersection_lon = 0;
+  ab->length_meters = 10;
+  ab->midX = 0;
+  ab->midY = 0;
+
+  bc->from_intersection_id = 2;
+  bc->from_intersection_lat = 0;
+  bc->from_intersection_lon = 0;
+  bc->to_intersection_id = 3;
+  bc->to_intersection_lat = 0;
+  bc->to_intersection_lon = 0;
+  bc->length_meters = 10;
+  bc->midX = 0;
+  bc->midY = 0;
+
+  node *street_ab = malloc(sizeof(node));
+  node *street_bc = malloc(sizeof(node));
+
+  street_ab->name = "street_ab";
+  street_ab->lat = 0;
+  street_ab->lon = 0;
+  street_ab->next = NULL;
+  street_ab->house = NULL;
+  street_ab->place = NULL;
+  street_ab->street = ab;
+
+  street_bc->name = "street_bc";
+  street_bc->lat = 0;
+  street_bc->lon = 0;
+  street_bc->next = NULL;
+  street_bc->house = NULL;
+  street_bc->place = NULL;
+  street_bc->street = bc;
+
+  add_street_to_intersection(&graph, 1, 0, 0, street_ab);
+  add_street_to_intersection(&graph, 2, 0, 0, street_ab);
+
+  add_street_to_intersection(&graph, 2, 0, 0, street_bc);
+  add_street_to_intersection(&graph, 3, 0, 0, street_bc);
+}
+
+void test_cross_product(){
+
+}
+
+void test_free_queue() {
+
 }
