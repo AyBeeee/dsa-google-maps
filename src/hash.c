@@ -9,9 +9,9 @@ int hash_intersection(hashmap *hash, long long intersection_id) {
   return (int)(intersection_id % hash->table_size);
 }
 
-//helper function tells us if id is already present in the intersections list
+// helper function tells us if id is already present in the intersections list
 bool intersection_seen(long long *intersections, int num_unique,
-                              long long intersection_id) {
+                       long long intersection_id) {
   for (int i = 0; i < num_unique; i++) {
     if (intersections[i] == intersection_id)
       return true;
@@ -19,9 +19,9 @@ bool intersection_seen(long long *intersections, int num_unique,
   return false;
 }
 
-//helper function to add the given id only if not present in the list already
+// helper function to add the given id only if not present in the list already
 void add_intersection_if_new(long long *intersections, int *num_unique,
-                                    long long intersection_id) {
+                             long long intersection_id) {
   if (!intersection_seen(intersections, *num_unique, intersection_id))
     intersections[(*num_unique)++] = intersection_id;
 }
@@ -30,12 +30,12 @@ void add_intersection_if_new(long long *intersections, int *num_unique,
 int unique_intersections(list_map *list) {
 
   node *head = list->head_streets;
-  int max_intersections = list->size_streets * 2; //worst case all from & to are diff
+  int max_intersections =
+      list->size_streets * 2; // worst case all from & to are diff
   long long *intersections = malloc(max_intersections * sizeof(long long));
   int num_unique = 0;
 
-  while (head)
-  {
+  while (head) {
     add_intersection_if_new(intersections, &num_unique,
                             head->street->from_intersection_id);
     add_intersection_if_new(intersections, &num_unique,
