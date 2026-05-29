@@ -12,6 +12,8 @@ void ask_address(list_map *h);
 node *find_node(list_map *list, char *street, int stype);
 node *find_coordinate(list_map *list, double x_target, double y_target,
                       bool verbose);
+queue *BFS(hashmap *graph, node *origin, node *destination);
+void print_path(queue *path);
 void init_list(list_map *list);
 
 #endif
