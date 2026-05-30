@@ -21,6 +21,7 @@ void test_freeing_hashmap(list_map *list);
 void test_places_parse_list(list_map *list);
 void test_find_place(list_map *list);
 void test_streets_parse_list(list_map *list);
+void test_find_street(list_map *list);
 void free_map(list_map *list);
 void test_queue(queue *q, node *test_node);
 void test_bfs(void);
@@ -42,6 +43,7 @@ int main(void) {
   test_places_parse_list(&list);
   test_find_place(&list);
   test_streets_parse_list(&list);
+  test_find_street(&list);
 
   // LAB 5 UNIT TESTS
   test_create_hashmap_type(&list);
@@ -122,7 +124,28 @@ void test_find_place(list_map *list) {
 
 void test_streets_parse_list(list_map *list) {
   assert(load_streets(list) != -1);
+  assert(list->head_streets != NULL);
+  assert(list->tail_streets != NULL);
+  assert(list->size_streets == 13);
   printf("Test Parse Streets.txt and Linked List Creation Passed!\n");
+}
+
+void test_find_street(list_map *list) {
+  node *curr = list->head_streets;
+
+  while (curr != NULL) {
+    if (strcmp(curr->name, "c. del baixant") == 0 &&
+        curr->street->from_intersection_id == 1 &&
+        curr->street->to_intersection_id == 4) {
+      assert(curr->street->length_meters == 100);
+      printf("Test Find Street Successful!\n");
+      return;
+    }
+
+    curr = curr->next;
+  }
+
+  assert(0);
 }
 
 // ######################### UNIT TESTS FOR LAB 5 #########################
