@@ -24,22 +24,25 @@ node *find_coordinate(list_map *list, double x_target, double y_target,
   // now with verbose flag for when i dont want to print the street info
   // and just find the best street instead.
   if (verbose) {
-    printf("Your coordinates: %f, %f\n", y_target, x_target);
-    printf("Closest street to you: %s\n", best_match->name);
-    printf("With coordinates between intersections %lld (%f, %f) and %lld (%f, "
-           "%f)\n",
-           best_match->street->from_intersection_id,
-           best_match->street->from_intersection_lat,
-           best_match->street->from_intersection_lon,
-           best_match->street->to_intersection_id,
-           best_match->street->to_intersection_lat,
-           best_match->street->to_intersection_lon);
+    printf("Closest street: %s\n", best_match->name);
+    printf("Between %lld (%f, %f) and %lld (%f, %f)\n",
+          best_match->street->from_intersection_id,
+          best_match->street->from_intersection_lat,
+          best_match->street->from_intersection_lon,
+          best_match->street->to_intersection_id,
+          best_match->street->to_intersection_lat,
+          best_match->street->to_intersection_lon);
+
+    printf("\nFrom this street segment, you can go to:\n");
 
     print_connected_streets(list->graph,
                             best_match->street->from_intersection_id,
                             best_match->name, true);
-  }
 
+    print_connected_streets(list->graph,
+                            best_match->street->to_intersection_id,
+                            best_match->name, true);
+  }
   return (best_match);
 }
 

@@ -60,7 +60,13 @@ node *ask_node(list_map *list) { // pass the malloc from ask_map
     printf("Enter street name (e.g. 'Carrer de Roc Boronat'): \n");
     scanf(" %49[^\n]", street);
 
-    return (find_node(list, street, HOUSES));
+    node *location = find_node(list, street, HOUSES);
+
+    if (location != NULL) {
+      find_coordinate(list, location->lon, location->lat, true);
+    }
+
+    return location;
   }
 
   else if (option == 2) {
@@ -74,7 +80,13 @@ node *ask_node(list_map *list) { // pass the malloc from ask_map
     }
     read_long_input(street, sizeof(street));
 
-    return (find_node(list, street, PLACES));
+    node *location = find_node(list, street, PLACES);
+
+    if (location != NULL) {
+      find_coordinate(list, location->lon, location->lat, true);
+    }
+
+    return location;
   }
 
   else {
@@ -85,6 +97,7 @@ node *ask_node(list_map *list) { // pass the malloc from ask_map
     printf("Enter X Coordinate (e.g. '2.1886874'):\n");
     scanf(" %lf", &x_coord);
 
+    printf("Found at (%f, %f)\n", y_coord, x_coord);
     return (find_coordinate(list, x_coord, y_coord, true));
   }
   return (NULL);
