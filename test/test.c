@@ -379,10 +379,7 @@ void test_bfs(void) {
   to_street->street = to_street_data;
 
   add_street_to_intersection(&graph, 1, 0, 0, from_street);
-  add_street_to_intersection(&graph, 2, 0, 0, from_street);
-
   add_street_to_intersection(&graph, 2, 0, 0, to_street);
-  add_street_to_intersection(&graph, 3, 0, 0, to_street);
 
   queue *path = BFS(&graph, from_street, to_street);
 

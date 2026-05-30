@@ -28,7 +28,7 @@ node *node_to_street(list_map *list, node *node);
 void init_queue(queue *q);
 void enqueue(queue *q, node *curr_node);
 node *dequeue(queue *q);
-int node_in_visited(hashmap *visited, node *curr);
+bool street_in_visited(hashmap *visited, node *street);
 int cross_product(node *from, node *to);
 void free_hash(hashmap *graph);
 int is_prime(int n);
