@@ -8,109 +8,148 @@
 #include <string.h>
 #include <time.h>
 
-long long other_intersection(node *street, long long intersection_id) {
-  if (street->street->from_intersection_id == intersection_id)
-    return street->street->to_intersection_id;
-  return street->street->from_intersection_id;
+typedef struct pending_path {
+  node *street;
+  long long intersection_id;
+  double distance;
+  struct pending_path *next;
+} pending_path;
+
+hashmap *create_empty_hashmap(int table_size) {
+  hashmap *map = malloc(sizeof(hashmap));
+
+  if (map == NULL)
+    return NULL;
+
+  map->table_size = table_size;
+  map->table = malloc(table_size * sizeof(intersection *));
+  if (map->table == NULL) {
+    free(map);
+    return NULL;
+  }
+
+  for (int i = 0; i < table_size; i++)
+    map->table[i] = NULL;
+
+  return map;
 }
 
-int was_visited(data_streets **visited, int visited_count,
-                data_streets *street) {
-  for (int i = 0; i < visited_count; i++) {
-    if (visited[i] == street)
-      return 1;
+void add_pending_path(pending_path **head, node *street, double distance) {
+  pending_path *new_path = malloc(sizeof(pending_path));
+
+  if (new_path == NULL)
+    return;
+
+  new_path->street = street;
+  new_path->intersection_id = street->street->to_intersection_id;
+  new_path->distance = distance;
+  new_path->next = NULL;
+
+  if (*head == NULL || distance < (*head)->distance) {
+    new_path->next = *head;
+    *head = new_path;
+    return;
   }
+
+  pending_path *current = *head;
+  while (current->next != NULL && current->next->distance <= distance)
+    current = current->next;
+
+  new_path->next = current->next;
+  current->next = new_path;
+}
+
+pending_path *pop_pending_path(pending_path **head) {
+  pending_path *current = *head;
+
+  if (*head == NULL)
+    return NULL;
+
+  *head = (*head)->next;
+  current->next = NULL;
+  return current;
+}
+
+void free_pending_paths(pending_path *head) {
+  while (head != NULL) {
+    pending_path *next = head->next;
+    free(head);
+    head = next;
+  }
+}
+
+int latency_street_in_visited(hashmap *visited, node *street) {
+  node *current =
+      get_connected_streets(visited, street->street->from_intersection_id);
+
+  while (current != NULL) {
+    if (current->street == street->street)
+      return 1;
+    current = current->next;
+  }
+
   return 0;
 }
 
-int path_exists(list_map *list, node *origin, node *destination,
-                int use_intersections_map) {
-  int max_streets = list->size_streets + 1;
-  node **queue = malloc(max_streets * sizeof(node *));
-  long long *queue_intersections = malloc(max_streets * sizeof(long long));
-  data_streets **visited = malloc(max_streets * sizeof(data_streets *));
-  int queue_start = 0;
-  int queue_end = 0;
-  int visited_count = 0;
-  long long start_intersection = origin->street->from_intersection_id;
+int dijkstra_path_exists(list_map *list, node *origin, node *destination,
+                         int use_intersections_map) {
+  hashmap *visited = create_empty_hashmap(list->graph->table_size);
+  pending_path *pending = NULL;
 
-  if (origin->street == destination->street) {
-    free(queue);
-    free(queue_intersections);
-    free(visited);
-    return 1;
-  }
+  if (visited == NULL)
+    return 0;
 
-  if (use_intersections_map) {
-    node *current = get_connected_streets(list->graph, start_intersection);
-    while (current != NULL) {
-      if (!was_visited(visited, visited_count, current->street)) {
-        visited[visited_count++] = current->street;
-        queue[queue_end] = current;
-        queue_intersections[queue_end++] =
-            other_intersection(current, start_intersection);
-      }
-      current = current->next;
-    }
-  } else {
-    node *current = list->head_streets;
-    while (current != NULL) {
-      if ((current->street->from_intersection_id == start_intersection ||
-           current->street->to_intersection_id == start_intersection) &&
-          !was_visited(visited, visited_count, current->street)) {
-        visited[visited_count++] = current->street;
-        queue[queue_end] = current;
-        queue_intersections[queue_end++] =
-            other_intersection(current, start_intersection);
-      }
-      current = current->next;
-    }
-  }
+  add_pending_path(&pending, origin, 0.0);
 
-  while (queue_start < queue_end) {
-    node *current_street = queue[queue_start];
-    long long current_intersection = queue_intersections[queue_start];
-    queue_start++;
+  while (pending != NULL) {
+    pending_path *current_path = pop_pending_path(&pending);
+    node *current_street = current_path->street;
 
     if (current_street->street == destination->street) {
-      free(queue);
-      free(queue_intersections);
-      free(visited);
+      free(current_path);
+      free_pending_paths(pending);
+      free_hash(visited);
       return 1;
     }
 
-    if (use_intersections_map) {
-      node *current = get_connected_streets(list->graph, current_intersection);
-      while (current != NULL) {
-        if (!was_visited(visited, visited_count, current->street) &&
-            queue_end < max_streets) {
-          visited[visited_count++] = current->street;
-          queue[queue_end] = current;
-          queue_intersections[queue_end++] =
-              other_intersection(current, current_intersection);
+    if (!latency_street_in_visited(visited, current_street)) {
+      add_street_to_intersection(
+          visited, current_street->street->from_intersection_id,
+          current_street->street->from_intersection_lat,
+          current_street->street->from_intersection_lon, current_street);
+
+      if (use_intersections_map) {
+        node *connected =
+            get_connected_streets(list->graph, current_path->intersection_id);
+
+        while (connected != NULL) {
+          if (!latency_street_in_visited(visited, connected)) {
+            add_pending_path(&pending, connected,
+                             current_path->distance +
+                                 connected->street->length_meters);
+          }
+          connected = connected->next;
         }
-        current = current->next;
-      }
-    } else {
-      node *current = list->head_streets;
-      while (current != NULL) {
-        if ((current->street->from_intersection_id == current_intersection ||
-             current->street->to_intersection_id == current_intersection) &&
-            !was_visited(visited, visited_count, current->street) &&
-            queue_end < max_streets) {
-          visited[visited_count++] = current->street;
-          queue[queue_end] = current;
-          queue_intersections[queue_end++] =
-              other_intersection(current, current_intersection);
+      } else {
+        node *connected = list->head_streets;
+
+        while (connected != NULL) {
+          if (connected->street->from_intersection_id ==
+                  current_path->intersection_id &&
+              !latency_street_in_visited(visited, connected)) {
+            add_pending_path(&pending, connected,
+                             current_path->distance +
+                                 connected->street->length_meters);
+          }
+          connected = connected->next;
         }
-        current = current->next;
       }
     }
+
+    free(current_path);
   }
 
-  free(queue);
-  free(queue_intersections);
-  free(visited);
+  free_hash(visited);
   return 0;
 }
 
@@ -151,8 +190,7 @@ int main() {
 
       node *current = list.head_streets;
       while (current != NULL) {
-        if (current->street->from_intersection_id == intersection_id ||
-            current->street->to_intersection_id == intersection_id)
+        if (current->street->from_intersection_id == intersection_id)
           connected_count++;
         current = current->next;
       }
@@ -197,8 +235,8 @@ int main() {
 
   printf("\n--- QUESTION 5: PATH FINDING ---\n");
   printf("Same coordinates are used in every map:\n");
-  printf("Origin: 41.403429, 2.193660\n");
-  printf("Destination: 41.404986, 2.194211\n");
+  printf("Origin: 41.401801, 2.196913\n");
+  printf("Destination: 41.404192, 2.195074\n");
 
   for (int map_index = 0; map_index < q5_number_of_maps; map_index++) {
     list_map list;
@@ -212,8 +250,8 @@ int main() {
     list.graph = create_hashmap(&list);
     load_streets_into_graph(list.graph, list.head_streets);
 
-    origin = find_coordinate(&list, 2.193660, 41.403429, false);
-    destination = find_coordinate(&list, 2.194211, 41.404986, false);
+    origin = find_coordinate(&list, 2.196913, 41.401801, false);
+    destination = find_coordinate(&list, 2.195074, 41.404192, false);
 
     printf("\nMap: %s (%d street segments)\n", list.map, list.size_streets);
     printf("Origin street: %s\n", origin->name);
@@ -227,7 +265,7 @@ int main() {
 
       clock_gettime(CLOCK_MONOTONIC, &start);
 
-      found = path_exists(&list, origin, destination, 0);
+      found = dijkstra_path_exists(&list, origin, destination, 0);
 
       clock_gettime(CLOCK_MONOTONIC, &end);
 
@@ -246,7 +284,7 @@ int main() {
 
       clock_gettime(CLOCK_MONOTONIC, &start);
 
-      found = path_exists(&list, origin, destination, 1);
+      found = dijkstra_path_exists(&list, origin, destination, 1);
 
       clock_gettime(CLOCK_MONOTONIC, &end);
 
@@ -304,7 +342,7 @@ int main() {
 
       clock_gettime(CLOCK_MONOTONIC, &start);
 
-      found = path_exists(&list, origin, destination, 0);
+      found = dijkstra_path_exists(&list, origin, destination, 0);
 
       clock_gettime(CLOCK_MONOTONIC, &end);
 
@@ -323,7 +361,7 @@ int main() {
 
       clock_gettime(CLOCK_MONOTONIC, &start);
 
-      found = path_exists(&list, origin, destination, 1);
+      found = dijkstra_path_exists(&list, origin, destination, 1);
 
       clock_gettime(CLOCK_MONOTONIC, &end);
 
