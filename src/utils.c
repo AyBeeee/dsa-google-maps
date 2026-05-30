@@ -33,9 +33,9 @@ void latlon_to_xy(double lat_ref, double lon_ref, double lat, double lon,
 // determine whether the street turns left (> 0) or right (< 0).
 // im sorry this is so ugly :sob:
 int cross_product(node *from, node *to) {
-  double Ax, Ay;
-  double Bx, By;
-  double Cx, Cy;
+  double Ax = 0.0, Ay = 0.0;
+  double Bx = 0.0, By = 0.0;
+  double Cx = 0.0, Cy = 0.0;
 
   // DEBUG
   // printf("\n--------- CROSS PRODUCT between %s and %s. ", from->name,

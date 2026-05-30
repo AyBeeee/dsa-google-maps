@@ -1,11 +1,19 @@
-SRC_FILES := $(filter-out src/main.c, $(wildcard src/*.c))
+SRC_FILES := $(filter-out src/main.c src/main_latency.c, $(wildcard src/*.c))
+LATENCY_FILES := src/find.c src/hash.c src/init.c src/parsing.c src/utils.c
 
 compile:
 	gcc -Wall -Wextra -Werror src/main.c $(SRC_FILES) -o main.out -lm -g
 
+compile_latency:
+	gcc -Wall -Wextra -Werror src/main_latency.c $(LATENCY_FILES) -o latency.out -lm -g
+
 r:
 	make compile
 	./main.out
+
+latency:
+	make compile_latency
+	./latency.out
 
 v:
 	make compile
@@ -43,6 +51,7 @@ dt:
 c:
 	rm main.out || true
 	rm test.out || true
+	rm latency.out || true
 
 f:
 	clang-format -i **/*.c **/*.h
