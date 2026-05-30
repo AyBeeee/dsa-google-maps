@@ -4,39 +4,39 @@
 
 I use `S` for the number of street segments and `I` for the number of different intersections.
 
-In our program, the intersections map is initialized after loading the streets. First, `unique_intersections` counts how many different intersection ids there are, because this number is used as the size of the hash table. Then `create_hashmap` allocates the table and initializes every bucket to `NULL`. Finally, `load_streets_into_graph` goes through the street list and inserts each street in the corresponding intersection bucket.
+In our program, the intersections map is initialized after loading the streets. First, `unique_intersections` counts how many different intersection ids appear in the street list. This value is used to choose the size of the hash table. Then `create_hashmap` allocates the table and initializes every bucket to `NULL`. Finally, `load_streets_into_graph` goes through the street list and inserts each street into the hash table using its intersection id.
 
-The best case is `O(S + I)`, which simplifies to `O(S)`, because each street is processed a constant number of times and the table is initialized once.
+The best case is `O(S + I)`, which simplifies to `O(S)` because the number of intersections is at most proportional to the number of street segments. This happens when checking whether an intersection was already seen stays cheap, for example when many streets share the same intersections.
 
-The average and worst cases in the current implementation are `O(S^2)`. The reason is that `unique_intersections` uses a nested search: for each street, it can scan the array of already found intersections to check if the id was already inserted. If many streets have different intersection ids, this becomes quadratic. After that, loading the streets into the hash map is average `O(S)` if the hash function distributes ids well, but the `O(S^2)` part dominates the total cost.
+The average and worst cases in the current implementation are `O(S^2)`. The reason is that `unique_intersections` stores the ids it has already found in an array. For each street, it may scan that array to check if the `from` or `to` intersection id was already inserted. If many streets have different intersection ids, this nested search becomes quadratic.
 
-If the unique intersections were counted with another hash set instead of an array search, the average case could be improved to `O(S)`.
+After the table is created, loading the streets into the hash map is `O(S)` on average if the hash function distributes ids well. However, the `O(S^2)` cost of counting unique intersections dominates the total complexity. If the unique intersections were counted with a hash set instead of an array search, the average initialization cost could be improved to `O(S)`.
 
 ## 2. Finding the coordinates of a street or place
 
 I use `H` for the number of houses, `P` for the number of places, and `L` for the length of the name string.
 
-The program stores houses and places in linked lists. To find an address, it scans the houses list until it finds a node with the same street name and house number. To find a place, it scans the places list until it finds a matching place name. This is a sequential search.
+The program stores houses and places in linked lists. To find an address, it scans the houses list until it finds a node with the same street name and house number. To find a place, it scans the places list until it finds a matching place name. Both operations are sequential searches.
 
-For an address, the best case is `O(1)` if the correct house is the first element in the list. The average case is `O(H)` because, on average, the program may need to check around half of the houses. The worst case is `O(H)` if the house is at the end of the list or is not found.
+For an address, the best case is `O(1)` if the correct house is the first element in the list. The average case is `O(H)` because the program may need to check many houses before finding the correct one. The worst case is `O(H)` if the house is at the end of the list or is not found.
 
-For a place, the best case is also `O(1)` if the place is found at the beginning of the places list. The average case is `O(P)`, and the worst case is `O(P)`.
+For a place, the best case is also `O(1)` if the place is found at the beginning of the places list. The average case is `O(P)`, and the worst case is `O(P)`. If there are multiple places with the same name, the program may scan the places list again to print and select the correct option, but this is still linear.
 
-If the program does not find an exact match, it may also calculate the Levenshtein distance to suggest a similar name. Comparing two strings with Levenshtein distance costs `O(L^2)` if both strings have length around `L`. In that case, the worst case becomes `O(H * L^2)` for houses or `O(P * L^2)` for places. If we treat name length as small and limited, the main cost is still the linear scan through the list.
+If the program does not find an exact match, it calculates Levenshtein distance to suggest similar street or place names. Comparing two strings with Levenshtein distance costs `O(L^2)` if both strings have length around `L`. In that case, the worst case becomes `O(H * L^2)` for houses or `O(P * L^2)` for places. If we treat name length as small and limited, the main cost is still the linear scan through the list.
 
 ## 3. Path-finding algorithm
 
-The path-finding algorithm is Breadth First Search (BFS). I use `V` for the number of streets or intersections visited by BFS, and `E` for the number of connections explored.
+The path-finding algorithm used in the final program is Dijkstra's algorithm. I use `V` for the number of visited street segments or intersections, and `E` for the number of street connections explored.
 
-BFS starts from the origin street and explores the graph level by level using a queue. First it checks all streets that are one step away, then all streets that are two steps away, and so on. It also keeps a `visited` hash table so that the same part of the graph is not processed many times. With BFS, the first route found is the route with the smallest number of street segments, but not necessarily the shortest route in meters.
+Dijkstra starts from the origin street and always explores the currently shortest known path first. In our implementation, the weight of a street connection is the street segment length in meters. This means the path found is based on distance, not only on the number of street segments.
+
+The algorithm keeps a `visited` hash table so that the same street segment is not processed many times. It also keeps a pending list of paths to explore, ordered by total distance. When a new path is created, it is inserted into this list in the correct position.
 
 The best case is `O(1)` if the origin is already the destination or if the destination is found immediately.
 
-In the current implementation, connected streets are found with the intersections map and `visited` is also stored with a hash table. On average, the BFS complexity is `O(V + E)`, because each visited node and each explored connection is processed a constant number of times.
+Finding connected streets with the intersections map is `O(1)` on average for each lookup, and checking `visited` is also `O(1)` on average. However, our pending paths are stored in a sorted linked list, not in a binary heap. Inserting a new path can take `O(E)` in the worst case because the program may need to scan through the pending list to find the correct position.
 
-The worst case can be worse if the hash table has many collisions, because a hash lookup can become linear inside one bucket. In that case, the cost can move closer to `O(E * V)`. With a good hash function and enough buckets, the expected case is still `O(V + E)`.
-
-If connected streets were found by sequentially scanning the whole street list instead of using the intersections map, the algorithm would be even slower, because each BFS step could require scanning all `S` street segments.
+Because of this sorted linked list, the average and worst case complexity of our Dijkstra implementation can be up to `O(E^2)`. In a road map, where the number of connections is usually close to the number of visited street segments, this often behaves closer to `O(V^2)`. If the pending paths were stored in a binary heap priority queue, the complexity could be improved to `O((V + E) log V)`.
 
 ## 4. Connected streets: list search vs intersections map by map size
 
@@ -168,15 +168,15 @@ All values are in milliseconds.
 
 ## 7. Improving the visited data structure in BFS
 
-The improvement for the `visited` data structure is to use a hash table instead of a list/queue. In our final BFS implementation, `visited` is stored as a hash map of intersection ids that have already been reached.
+The improvement for the `visited` data structure is to use a hash table instead of a list/queue. In our final implementation, visited street segments are stored in a hash table. The bucket is chosen using an intersection id, and the stored street segment is compared to know if it was already visited.
 
-This is useful because BFS checks `visited` very often. If `visited` is a list, the program has to scan the list to know whether a street or intersection was already visited. With a hash table, the program uses the intersection id as a key and goes directly to the corresponding bucket.
+This is useful because BFS checks `visited` very often. If `visited` is a list, the program has to scan the list to know whether a street was already visited. With a hash table, the program goes directly to the corresponding bucket and only checks the streets stored there.
 
-With a list approach, checking if an element is already in `visited` costs `O(V)` in the worst case, where `V` is the number of visited elements. Since BFS performs this check many times while exploring connected streets, the total cost can become `O(E * V)`, where `E` is the number of connections explored. In road maps, `E` is usually close to `V`, so this can behave like `O(V^2)`.
+With a list approach, checking if a street is already in `visited` costs `O(V)` in the worst case, where `V` is the number of visited streets. Since BFS performs this check many times while exploring connected streets, the total cost can become `O(E * V)`, where `E` is the number of connections explored. In road maps, `E` is usually close to `V`, so this can behave like `O(V^2)`.
 
-With the hash table, checking if an intersection was already visited is `O(1)` on average. This improves BFS to `O(V + E)` on average, because each visited element and each connection is processed a constant number of times. The worst case can still be worse if many keys collide in the same bucket, but with a good table size the average case is much better than using a list.
+With the hash table, checking if a street was already visited is `O(1)` on average. This improves BFS to `O(V + E)` on average, because each visited street and each connection is processed a constant number of times. The worst case can still be worse if many keys collide in the same bucket, but with a good table size the average case is much better than using a list.
 
-The main trade-off is memory usage. A hash table needs extra memory for the buckets, while a list only stores the visited elements one after another. It also makes the code a little more complex, because we need a hash function and insert/search operations. For larger maps, this trade-off is worth it because BFS checks `visited` very often.
+The main trade-off is memory usage. A hash table needs extra memory for the buckets, while a list only stores the visited streets one after another. It also makes the code a little more complex, because we need a hash function and insert/search operations. For larger maps, this trade-off is worth it because BFS checks `visited` very often.
 
 ## 8. Improving closest street search from latitude and longitude
 
@@ -188,6 +188,6 @@ I would choose a grid index because it is simpler to implement and understand th
 
 With the current list approach, the runtime complexity is `O(S)` for every search, where `S` is the number of street segments. This is because the program must calculate the distance to every street midpoint.
 
-With a spatial grid, building the grid would cost `O(S)` when the map is loaded, because every street segment must be inserted once. After that, searching for the closest street would be much faster on average. If only `K` street segments are in the nearby cells that we check, the average search cost becomes `O(K)`, where `K` is much smaller than `S`. In the best case, the correct nearby cell contains very few streets, so the search is close to `O(1)`. The worst case can still be `O(S)` if many streets are in the same cell, or if the program has to expand the search to many cells.
+With a spatial grid, building the grid would cost `O(S)` when the map is loaded, because every street segment must be inserted once. After that, searching for the closest street would be much faster on average. If only `K` street segments are in the nearby cells that we check, the average search cost becomes `O(K)`, where `K` is usually much smaller than `S`. In the best case, the correct nearby cell contains very few streets, so the search is close to `O(1)`. The worst case can still be `O(S)` if many streets are in the same cell, or if the program has to expand the search to many cells.
 
 The main trade-off is memory usage. The grid stores extra lists of street segments for each cell, so it uses more memory than only keeping one linked list of all streets. There is also an extra preprocessing step when loading the map. Another downside is that the cell size must be chosen carefully. If the cells are too large, each cell contains too many streets and the search is still slow. If the cells are too small, the program may need to check many neighboring cells to avoid missing the closest street.
