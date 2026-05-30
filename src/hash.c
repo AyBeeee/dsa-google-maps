@@ -119,8 +119,8 @@ void load_streets_into_graph(hashmap *graph, node *head_streets) {
   while (curr != NULL) {
 
     add_street_to_intersection(graph, curr->street->from_intersection_id,
-                              curr->street->from_intersection_lat,
-                              curr->street->from_intersection_lon, curr);
+                               curr->street->from_intersection_lat,
+                               curr->street->from_intersection_lon, curr);
     // printf("Loaded %s\n", curr->name); DEBUG LOADING IN HASH MAP
     curr = curr->next;
   }
@@ -157,14 +157,40 @@ node *get_connected_streets(hashmap *graph, long long intersection_id) {
 // print connected streets in a bucket
 void print_connected_streets(hashmap *graph, long long intersection_id,
                              char *name, bool notItself) {
-  node *current = get_connected_streets(graph, intersection_id);
+  node *head = get_connected_streets(graph, intersection_id);
+  node *current = head;
 
   while (current != NULL) {
-    if (notItself && same_street_name(current->name, name) == true)
-      ;
-    else
-      printf("- %s, length: %lf meters\n", current->name,
-             current->street->length_meters);
+    bool already_printed = false;
+    node *previous = head;
+
+    while (previous != current) {
+      if (same_street_name(previous->name, current->name))
+        already_printed = true;
+      previous = previous->next;
+    }
+
+    if ((!notItself || !same_street_name(current->name, name)) &&
+        !already_printed) {
+      printf("%s\n", current->name);
+
+      node *connected =
+          get_connected_streets(graph, current->street->to_intersection_id);
+      node *next_street = connected;
+
+      while (next_street != NULL &&
+             same_street_name(next_street->name, current->name))
+        next_street = next_street->next;
+
+      if (next_street != NULL)
+        printf("Which is connected to:\n");
+
+      while (connected != NULL) {
+        if (!same_street_name(connected->name, current->name))
+          printf("%s\n", connected->name);
+        connected = connected->next;
+      }
+    }
     current = current->next;
   }
 }

@@ -26,17 +26,16 @@ node *find_coordinate(list_map *list, double x_target, double y_target,
   if (verbose) {
     printf("Closest street: %s\n", best_match->name);
     printf("Between %lld (%f, %f) and %lld (%f, %f)\n",
-          best_match->street->from_intersection_id,
-          best_match->street->from_intersection_lat,
-          best_match->street->from_intersection_lon,
-          best_match->street->to_intersection_id,
-          best_match->street->to_intersection_lat,
-          best_match->street->to_intersection_lon);
+           best_match->street->from_intersection_id,
+           best_match->street->from_intersection_lat,
+           best_match->street->from_intersection_lon,
+           best_match->street->to_intersection_id,
+           best_match->street->to_intersection_lat,
+           best_match->street->to_intersection_lon);
 
     printf("\nFrom this street segment, you can go to:\n");
 
-    print_connected_streets(list->graph,
-                            best_match->street->to_intersection_id,
+    print_connected_streets(list->graph, best_match->street->to_intersection_id,
                             best_match->name, false);
   }
   return (best_match);
@@ -61,7 +60,8 @@ node *find_node(list_map *list, char *street, int ntype) {
   int num = -1;
   int place_matches = 0;
   node *first_place_match = NULL;
-  // similar streets list implemented (this will give us the top 3 streets with the lowest dist)
+  // similar streets list implemented (this will give us the top 3 streets with
+  // the lowest dist)
   node *similar_streets[3] = {NULL, NULL, NULL};
   int similar_distances[3] = {INT_MAX, INT_MAX, INT_MAX};
   int similar_count = 0;
@@ -202,7 +202,8 @@ node *find_node(list_map *list, char *street, int ntype) {
     curr = list->head_places;
     while (curr != NULL) {
       if (strcmp(curr->name, street) == 0) {
-        printf("%d. %s at %lf | %lf\n", option, curr->name, curr->lat, curr->lon);
+        printf("%d. %s at %lf | %lf\n", option, curr->name, curr->lat,
+               curr->lon);
         option++;
       }
       curr = curr->next;
@@ -262,9 +263,7 @@ node *find_node(list_map *list, char *street, int ntype) {
     printf("We couldn't find that place. Did you mean:\n");
 
     for (int i = 0; i < similar_place_count; i++) {
-      printf("%d. %s at %lf | %lf\n", i + 1,
-            similar_places[i]->name,
-            similar_places[i]->lat, similar_places[i]->lon);
+      printf("%d. %s\n", i + 1, similar_places[i]->name);
     }
 
     printf("Choose one: ");
@@ -276,7 +275,7 @@ node *find_node(list_map *list, char *street, int ntype) {
     }
 
     printf("Found at %lf | %lf\n", similar_places[selected - 1]->lat,
-          similar_places[selected - 1]->lon);
+           similar_places[selected - 1]->lon);
 
     return similar_places[selected - 1];
   }
