@@ -169,7 +169,7 @@ int load_streets(list_map *list) {
     // calloc between the end of the line and seventh comma
     newnode->name =
         calloc(strlen(line) - findnchar(line, ',', 7) + 1, sizeof(char));
-    sscanf(line, "%lld, %lf, %lf, %lld, %lf, %lf, %lf, %255[^\n]",
+    sscanf(line, "%lld, %lf, %lf, %lld, %lf, %lf, %lf, %255[^\r\n]",
            &newnode->street->from_intersection_id,
            &newnode->street->from_intersection_lat,
            &newnode->street->from_intersection_lon,

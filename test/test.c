@@ -51,12 +51,13 @@ int main(void) {
   printf("Test Hashmap Intersection Successful!\n");
   test_load_streets_into_graph(&list);
   test_find_intersection_and_add_street(&list);
-  printf("Lab 5 Unit Tests Passed!\n\n");
+  printf("Lab 5 Unit Tests Passed!\n");
 
   // LAB 6 UNIT TESTS
   queue *q = malloc(sizeof(queue));
   node *test_node = malloc(sizeof(node));
   test_queue(q, test_node);
+  test_cross_product();
   test_bfs();
   test_freeing_hashmap(&list);
   test_free_queue();
@@ -279,6 +280,56 @@ void test_queue(queue *q, node *test_node) {
   assert(q->head->street == test_node->street);
 
   printf("test queue successful\n");
+}
+
+void test_cross_product(void) {
+  data_streets from_data = {0};
+  data_streets left_data = {0};
+  data_streets right_data = {0};
+  data_streets straight_data = {0};
+  node from = {0};
+  node left = {0};
+  node right = {0};
+  node straight = {0};
+
+  from_data.from_intersection_id = 1;
+  from_data.from_intersection_lat = 0;
+  from_data.from_intersection_lon = 0;
+  from_data.to_intersection_id = 2;
+  from_data.to_intersection_lat = 0;
+  from_data.to_intersection_lon = 1;
+
+  left_data.from_intersection_id = 2;
+  left_data.from_intersection_lat = 0;
+  left_data.from_intersection_lon = 1;
+  left_data.to_intersection_id = 3;
+  left_data.to_intersection_lat = 1;
+  left_data.to_intersection_lon = 1;
+
+  right_data.from_intersection_id = 2;
+  right_data.from_intersection_lat = 0;
+  right_data.from_intersection_lon = 1;
+  right_data.to_intersection_id = 4;
+  right_data.to_intersection_lat = -1;
+  right_data.to_intersection_lon = 1;
+
+  straight_data.from_intersection_id = 2;
+  straight_data.from_intersection_lat = 0;
+  straight_data.from_intersection_lon = 1;
+  straight_data.to_intersection_id = 5;
+  straight_data.to_intersection_lat = 0;
+  straight_data.to_intersection_lon = 2;
+
+  from.street = &from_data;
+  left.street = &left_data;
+  right.street = &right_data;
+  straight.street = &straight_data;
+
+  assert(cross_product(&from, &left) == LEFT);
+  assert(cross_product(&from, &right) == RIGHT);
+  assert(cross_product(&from, &straight) == STRAIGHT);
+
+  printf("Test cross product passed successfully\n");
 }
 
 void test_bfs(void) {
