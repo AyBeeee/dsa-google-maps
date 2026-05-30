@@ -293,8 +293,7 @@ char *skip_street_prefix(char *str) {
 }
 
 bool same_street_name(char *map_name, char *user_name) {
-  return strcmp(skip_street_prefix(map_name), skip_street_prefix(user_name)) ==
-         0;
+  return strcmp(map_name, user_name) == 0;
 }
 
 int LevenshteinDistance(char *a, char *b) {

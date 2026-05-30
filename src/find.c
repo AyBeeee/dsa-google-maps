@@ -271,32 +271,45 @@ node *find_node(list_map *list, char *street, int ntype) {
     }
     printf("\n");
 
-    if (best_num_match != NULL) {
-      if (best_num_match->house->num != num) {
-        printf("We found the street, but number %d is not valid.\n", num);
-        printf("Valid numbers in %s: ", matched_street);
-
-        curr = list->head_houses;
-        while (curr != NULL) {
-          if (strcmp(curr->name, matched_street) == 0) {
-            printf("%d ", curr->house->num);
-          }
-          curr = curr->next;
-        }
-
-        printf("\nDid you mean number %d? [Y-N]\n", best_num_match->house->num);
-        scanf(" %c", &choice);
-      }
-      if (choice == 'Y' || choice == 'y' || best_num_match->house->num == num) {
-        printf("Found at %lf | %lf\n", best_num_match->lat,
-               best_num_match->lon);
-        return best_num_match;
-      }
+    if (best_num_match == NULL) {
+      printf("We couldn't find your location!\n");
+      return NULL;
     }
 
-    printf("That number is not valid for this street\n");
-    return NULL;
+    if (best_num_match->house->num != num) {
+      printf("We found the street, but number %d is not valid\n", num);
+      printf("Valid numbers in %s: ", matched_street);
+
+      curr = list->head_houses;
+      while (curr != NULL) {
+        if (strcmp(curr->name, matched_street) == 0) {
+          printf("%d ", curr->house->num);
+        }
+        curr = curr->next;
+      }
+
+      // ask the user for a valid number from the printed numbers
+      printf("\nChoose a valid number: ");
+      scanf("%d", &num);
+
+      curr = list->head_houses;
+      while (curr != NULL) {
+        if (strcmp(curr->name, matched_street) == 0 &&
+            curr->house->num == num) {
+          printf("Found at %lf | %lf\n", curr->lat, curr->lon);
+          return curr;
+        }
+        curr = curr->next;
+      }
+
+      printf("That number is not valid for this street\n");
+      return NULL;
+    }
+
+    printf("Found at %lf | %lf\n", best_num_match->lat, best_num_match->lon);
+    return best_num_match;
   }
+
   printf("We couldn't find your location!\n");
   return NULL;
 }
