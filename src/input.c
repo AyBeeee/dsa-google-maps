@@ -53,7 +53,8 @@ node *ask_node(list_map *list, int stype) { // pass the malloc from ask_map
   if (stype == ORIGIN)
     printf("Where are you? Address (1), Place (2) or Coordinate (3)?\n");
   else
-    printf("Where do you want to go? Address (1), Place (2) or Coordinate (3)?\n");
+    printf(
+        "Where do you want to go? Address (1), Place (2) or Coordinate (3)?\n");
   scanf("%d", &option);
 
   if (option != 1 && option != 2 && option != 3)

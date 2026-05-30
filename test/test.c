@@ -85,8 +85,7 @@ void test_find_house(list_map *list) {
   node *curr = list->head_houses;
 
   while (curr != NULL) {
-    if (strcmp(curr->name, "c. pompeu fabra") == 0 &&
-        curr->house->num == 9) {
+    if (strcmp(curr->name, "c. pompeu fabra") == 0 && curr->house->num == 9) {
       assert(curr->lat == 13.000000);
       assert(curr->lon == 34.333333);
       printf("Test Find House Successful\n");

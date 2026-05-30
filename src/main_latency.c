@@ -320,12 +320,11 @@ int main() {
 
   for (int distance_index = 0; distance_index < number_of_distances;
        distance_index++) {
-    node *destination =
-        find_coordinate(&list, destination_lon[distance_index],
-                        destination_lat[distance_index], false);
-    double distance_meters =
-        haversine(origin->lat, origin->lon, destination->lat, destination->lon) *
-        1000.0;
+    node *destination = find_coordinate(&list, destination_lon[distance_index],
+                                        destination_lat[distance_index], false);
+    double distance_meters = haversine(origin->lat, origin->lon,
+                                       destination->lat, destination->lon) *
+                             1000.0;
 
     printf("\nDistance case: %s\n", distance_name[distance_index]);
     printf("Destination: %.6f, %.6f\n", destination_lat[distance_index],
