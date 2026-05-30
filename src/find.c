@@ -64,6 +64,9 @@ node *find_node(list_map *list, char *street, int ntype) {
   int num = -1;
   int place_matches = 0;
   node *first_place_match = NULL;
+  node *similar_streets[3] = {NULL, NULL, NULL};
+  int similar_distances[3] = {INT_MAX, INT_MAX, INT_MAX};
+  int similar_count = 0;
 
   if (ntype == HOUSES) {
     printf("Enter street number (e.g. '138'): \n");
@@ -99,11 +102,64 @@ node *find_node(list_map *list, char *street, int ntype) {
 
     // compare using distance to find most similar one
     else {
-      int dist = LevenshteinDistance(curr->name, street);
+      int dist;
+
+      // perform levenshtein distance with the houses to calculate the dist of
+      // the curr street
+      if (ntype == HOUSES) {
+        dist = LevenshteinDistance(skip_street_prefix(curr->name),
+                                   skip_street_prefix(street));
+      }
+
+      else {
+        dist = LevenshteinDistance(curr->name, street);
+      }
+
       // printf("dist calculated is: %i\n", dist); //DEBUG
       if (dist < best_dist) {
         best_dist = dist;
         best_match = curr;
+      }
+
+      if (ntype == HOUSES) {
+        bool already_added =
+            false; // first time seeing the street mark as false
+
+        for (int j = 0; j < similar_count; j++) {
+          if (same_street_name(similar_streets[j]->name, curr->name)) {
+            already_added = true; // mark alread_added as true if the street
+                                  // name is found in the list of added streets
+          }
+        }
+
+        // if the address hasn't been added to the list of addresses
+        if (!already_added) {
+          int position = similar_count;
+
+          // if the levenshtein distance is lower than any of the current
+          // distances stored, update the position where dist < current dist
+          for (int j = 0; j < similar_count; j++) {
+            if (dist < similar_distances[j]) {
+              position = j;
+              break;
+            }
+          }
+
+          if (position < 3) {
+            if (similar_count < 3) {
+              similar_count++;
+            }
+
+            // insert the new address with low dist in the correct idx
+            for (int j = similar_count - 1; j > position; j--) {
+              similar_streets[j] = similar_streets[j - 1];
+              similar_distances[j] = similar_distances[j - 1];
+            }
+
+            similar_streets[position] = curr;
+            similar_distances[position] = dist;
+          }
+        }
       }
     }
     curr = curr->next;
@@ -152,29 +208,48 @@ node *find_node(list_map *list, char *street, int ntype) {
     }
   }
 
-  if (best_dist < threshold && best_match != NULL) {
-    printf("We couldn't find the address, did you mean: %s [Y-N]\n",
+  // if the street_found flag is false, the user is asking for houses, the
+  if (!street_found && ntype == HOUSES && similar_count > 0 &&
+      similar_distances[0] < threshold) {
+    int selected;
+
+    printf("We couldn't find that street. Did you mean:\n");
+
+    // Print similar streets to the one entered by the user (print a number and
+    // the address)
+    for (int i = 0; i < similar_count; i++) {
+      printf("%d. %s\n", i + 1, similar_streets[i]->name);
+    }
+
+    printf("Choose one: ");
+    scanf("%d", &selected);
+
+    if (selected < 1 || selected > similar_count) {
+      printf("Wrong input\n");
+      return NULL;
+    }
+
+    matched_street = similar_streets[selected - 1]->name;
+    street_found = 1;
+  }
+
+  if (ntype == PLACES && best_dist < threshold && best_match != NULL) {
+    printf("We couldn't find the place did you mean: %s [Y-N]\n",
            best_match->name);
     scanf(" %c", &choice);
+
     if (choice == 'Y' || choice == 'y') {
       printf("Found at %lf | %lf\n", best_match->lat, best_match->lon);
       return best_match;
-      return best_match;
-    } else {
-      printf("We couldn't find your location!\n");
-      return NULL;
     }
+
+    printf("We couldn't find your location!\n");
+    return NULL;
   }
 
   if (street_found && ntype == HOUSES) {
-    char num_str[16];
-    char candidate_str[16];
     int best_num_dist = INT_MAX;
     node *best_num_match = NULL;
-
-    snprintf(num_str, sizeof(num_str), "%d", num);
-
-    printf("Valid numbers in %s: ", matched_street);
 
     curr = list->head_houses;
     while (curr != NULL) {
@@ -185,8 +260,7 @@ node *find_node(list_map *list, char *street, int ntype) {
         // if not found -> print invalid num & print availablwe numbers
         // flow of selecting correct number
 
-        snprintf(candidate_str, sizeof(candidate_str), "%d", curr->house->num);
-        dist = LevenshteinDistance(candidate_str, num_str);
+        dist = abs(curr->house->num - num);
 
         if (dist < best_num_dist) {
           best_num_dist = dist;
@@ -200,7 +274,17 @@ node *find_node(list_map *list, char *street, int ntype) {
     if (best_num_match != NULL) {
       if (best_num_match->house->num != num) {
         printf("We found the street, but number %d is not valid.\n", num);
-        printf("Did you mean number %d? [Y-N]\n", best_num_match->house->num);
+        printf("Valid numbers in %s: ", matched_street);
+
+        curr = list->head_houses;
+        while (curr != NULL) {
+          if (strcmp(curr->name, matched_street) == 0) {
+            printf("%d ", curr->house->num);
+          }
+          curr = curr->next;
+        }
+
+        printf("\nDid you mean number %d? [Y-N]\n", best_num_match->house->num);
         scanf(" %c", &choice);
       }
       if (choice == 'Y' || choice == 'y' || best_num_match->house->num == num) {

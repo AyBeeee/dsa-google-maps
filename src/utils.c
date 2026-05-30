@@ -143,16 +143,6 @@ void read_long_input(char *buffer, int size) {
   }
 }
 
-void free_explore_path(path_node *head) {
-  path_node *temp;
-  while (head) {
-    printf("hello im freeing\n");
-    temp = head->next;
-    free(head);
-    head = temp;
-  }
-}
-
 void free_hash(hashmap *graph) {
   if (graph) {
     for (int i = 0; i < graph->table_size; i++) {
