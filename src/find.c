@@ -36,12 +36,8 @@ node *find_coordinate(list_map *list, double x_target, double y_target,
     printf("\nFrom this street segment, you can go to:\n");
 
     print_connected_streets(list->graph,
-                            best_match->street->from_intersection_id,
-                            best_match->name, true);
-
-    print_connected_streets(list->graph,
                             best_match->street->to_intersection_id,
-                            best_match->name, true);
+                            best_match->name, false);
   }
   return (best_match);
 }

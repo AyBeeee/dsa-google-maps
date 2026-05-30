@@ -119,11 +119,8 @@ void load_streets_into_graph(hashmap *graph, node *head_streets) {
   while (curr != NULL) {
 
     add_street_to_intersection(graph, curr->street->from_intersection_id,
-                               curr->street->from_intersection_lat,
-                               curr->street->from_intersection_lon, curr);
-    add_street_to_intersection(graph, curr->street->to_intersection_id,
-                               curr->street->to_intersection_lat,
-                               curr->street->to_intersection_lon, curr);
+                              curr->street->from_intersection_lat,
+                              curr->street->from_intersection_lon, curr);
     // printf("Loaded %s\n", curr->name); DEBUG LOADING IN HASH MAP
     curr = curr->next;
   }
