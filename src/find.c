@@ -55,18 +55,21 @@ node *find_node(list_map *list, char *street, int ntype) {
     size = list->size_places;
   }
 
-  node *best_match = NULL; // init best match
-  int best_dist = INT_MAX;
   int threshold = 7;
+  int place_threshold = 10;
   int street_found = 0;
   char *matched_street = street;
-  char choice = '\0';
   int num = -1;
   int place_matches = 0;
   node *first_place_match = NULL;
+  // similar streets list implemented (this will give us the top 3 streets with the lowest dist)
   node *similar_streets[3] = {NULL, NULL, NULL};
   int similar_distances[3] = {INT_MAX, INT_MAX, INT_MAX};
   int similar_count = 0;
+  // same idea as the streets but for places
+  node *similar_places[3] = {NULL, NULL, NULL};
+  int similar_place_distances[3] = {INT_MAX, INT_MAX, INT_MAX};
+  int similar_place_count = 0;
 
   if (ntype == HOUSES) {
     printf("Enter street number (e.g. '138'): \n");
@@ -116,10 +119,6 @@ node *find_node(list_map *list, char *street, int ntype) {
       }
 
       // printf("dist calculated is: %i\n", dist); //DEBUG
-      if (dist < best_dist) {
-        best_dist = dist;
-        best_match = curr;
-      }
 
       if (ntype == HOUSES) {
         bool already_added =
@@ -161,6 +160,31 @@ node *find_node(list_map *list, char *street, int ntype) {
           }
         }
       }
+
+      if (ntype == PLACES) {
+        int position = similar_place_count;
+
+        for (int j = 0; j < similar_place_count; j++) {
+          if (dist < similar_place_distances[j]) {
+            position = j;
+            break;
+          }
+        }
+
+        if (position < 3) {
+          if (similar_place_count < 3) {
+            similar_place_count++;
+          }
+
+          for (int j = similar_place_count - 1; j > position; j--) {
+            similar_places[j] = similar_places[j - 1];
+            similar_place_distances[j] = similar_place_distances[j - 1];
+          }
+
+          similar_places[position] = curr;
+          similar_place_distances[position] = dist;
+        }
+      }
     }
     curr = curr->next;
   }
@@ -179,8 +203,7 @@ node *find_node(list_map *list, char *street, int ntype) {
     curr = list->head_places;
     while (curr != NULL) {
       if (strcmp(curr->name, street) == 0) {
-        printf("%d. %s (%s) at %lf | %lf\n", option, curr->name,
-               curr->place->amenity, curr->lat, curr->lon);
+        printf("%d. %s at %lf | %lf\n", option, curr->name, curr->lat, curr->lon);
         option++;
       }
       curr = curr->next;
@@ -233,18 +256,30 @@ node *find_node(list_map *list, char *street, int ntype) {
     street_found = 1;
   }
 
-  if (ntype == PLACES && best_dist < threshold && best_match != NULL) {
-    printf("We couldn't find the place did you mean: %s [Y-N]\n",
-           best_match->name);
-    scanf(" %c", &choice);
+  if (ntype == PLACES && similar_place_count > 0 &&
+      similar_place_distances[0] < place_threshold) {
+    int selected;
 
-    if (choice == 'Y' || choice == 'y') {
-      printf("Found at %lf | %lf\n", best_match->lat, best_match->lon);
-      return best_match;
+    printf("We couldn't find that place. Did you mean:\n");
+
+    for (int i = 0; i < similar_place_count; i++) {
+      printf("%d. %s at %lf | %lf\n", i + 1,
+            similar_places[i]->name,
+            similar_places[i]->lat, similar_places[i]->lon);
     }
 
-    printf("We couldn't find your location!\n");
-    return NULL;
+    printf("Choose one: ");
+    scanf("%d", &selected);
+
+    if (selected < 1 || selected > similar_place_count) {
+      printf("Wrong input\n");
+      return NULL;
+    }
+
+    printf("Found at %lf | %lf\n", similar_places[selected - 1]->lat,
+          similar_places[selected - 1]->lon);
+
+    return similar_places[selected - 1];
   }
 
   if (street_found && ntype == HOUSES) {
