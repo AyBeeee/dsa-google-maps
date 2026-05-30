@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 node *ask(list_map *list, int stype);
-node *ask_node(list_map *list);
+node *ask_node(list_map *list, int stype);
 void ask_map(list_map *list);
 void ask_address(list_map *h);
 node *find_node(list_map *list, char *street, int stype);

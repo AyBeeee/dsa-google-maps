@@ -161,27 +161,36 @@ node *find_node(list_map *list, char *street, int ntype) {
       }
 
       if (ntype == PLACES) {
-        int position = similar_place_count;
+        bool already_added = false;
 
         for (int j = 0; j < similar_place_count; j++) {
-          if (dist < similar_place_distances[j]) {
-            position = j;
-            break;
-          }
+          if (strcmp(similar_places[j]->name, curr->name) == 0)
+            already_added = true;
         }
 
-        if (position < 3) {
-          if (similar_place_count < 3) {
-            similar_place_count++;
+        if (!already_added) {
+          int position = similar_place_count;
+
+          for (int j = 0; j < similar_place_count; j++) {
+            if (dist < similar_place_distances[j]) {
+              position = j;
+              break;
+            }
           }
 
-          for (int j = similar_place_count - 1; j > position; j--) {
-            similar_places[j] = similar_places[j - 1];
-            similar_place_distances[j] = similar_place_distances[j - 1];
-          }
+          if (position < 3) {
+            if (similar_place_count < 3) {
+              similar_place_count++;
+            }
 
-          similar_places[position] = curr;
-          similar_place_distances[position] = dist;
+            for (int j = similar_place_count - 1; j > position; j--) {
+              similar_places[j] = similar_places[j - 1];
+              similar_place_distances[j] = similar_place_distances[j - 1];
+            }
+
+            similar_places[position] = curr;
+            similar_place_distances[position] = dist;
+          }
         }
       }
     }

@@ -44,13 +44,16 @@ node *ask(list_map *list, int stype) {
     printf("\n");
     printf("--- DESTINATION ---\n");
   }
-  return (ask_node(list));
+  return (ask_node(list, stype));
 }
 
-node *ask_node(list_map *list) { // pass the malloc from ask_map
+node *ask_node(list_map *list, int stype) { // pass the malloc from ask_map
 
   int option;
-  printf("Where are you? Address (1), Place (2) or Coordinate (3)?\n");
+  if (stype == ORIGIN)
+    printf("Where are you? Address (1), Place (2) or Coordinate (3)?\n");
+  else
+    printf("Where do you want to go? Address (1), Place (2) or Coordinate (3)?\n");
   scanf("%d", &option);
 
   if (option != 1 && option != 2 && option != 3)
