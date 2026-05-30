@@ -38,7 +38,7 @@ int main() {
   destination = node_to_street(&list, destination);
 
   if (!origin || !destination) {
-    printf("Could not find origin node or destination node");
+    printf("Could not find origin node or destination node\n");
     free_map(&list);
     return 1;
   }
@@ -46,7 +46,7 @@ int main() {
   queue *path = BFS(list.graph, origin, destination);
 
   if (!path) {
-    printf("Couldn't find a path to the destination");
+    printf("Couldn't find a path to the destination\n");
     free_map(&list);
     return 0;
   }

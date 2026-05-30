@@ -13,7 +13,6 @@
 enum turndirection { LEFT, RIGHT, STRAIGHT };
 enum idmissing { FROM, TO, BOTH, NONE };
 
-char *capitalise(char *str);
 int LevenshteinDistance(char *a, char *b);
 void read_long_input(char *buffer, int size);
 void free_map(list_map *list);
@@ -33,6 +32,7 @@ int node_in_visited(hashmap *visited, node *curr);
 int cross_product(node *from, node *to);
 void free_hash(hashmap *graph);
 int is_prime(int n);
-void free_explore_path(path_node *head);
+queue *copy_queue(queue *original);
+void free_queue(queue *q);
 
 #endif

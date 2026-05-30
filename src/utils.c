@@ -388,39 +388,25 @@ node *dequeue(queue *q) {
   return curr;
 }
 
-// helper function to make the BFS the tiniest bit less ugly
-//  checks indiscriminately from and to ids to save lines
-int node_in_visited(hashmap *visited, node *curr) {
-  int missing = 0;
-  int from_index =
-      hash_intersection(visited, curr->street->from_intersection_id);
-  int to_index = hash_intersection(visited, curr->street->to_intersection_id);
-
-  if (in_intersection(visited, from_index,
-                      curr->street->from_intersection_id) == NULL)
-    missing++;
-
-  if (in_intersection(visited, to_index, curr->street->to_intersection_id) ==
-      NULL) {
-    if (missing)
-      return BOTH;
-    else
-      return TO;
+queue *copy_queue(queue *original) {
+  queue *new_queue = malloc(sizeof(queue));
+  init_queue(new_queue);
+  node *curr = original->head;
+  while (curr != NULL) {
+    enqueue(new_queue, curr); // enqueue handles the malloc internally
+    curr = curr->next;
   }
-  if (missing)
-    return FROM;
-  return NONE;
+  return new_queue;
 }
 
-node *node_in_queue_old(queue *q, node *curr) {
-  node *temp = q->head;
-
-  while (temp != NULL) {
-    if (temp->street == curr->street) {
-      return temp;
-    }
-    temp = temp->next;
+void free_queue(queue *q) {
+  if (!q)
+    return;
+  node *curr = q->head;
+  while (curr != NULL) {
+    node *temp = curr->next;
+    free(curr); // free the wrapper node only, not curr->street
+    curr = temp;
   }
-
-  return NULL;
+  free(q);
 }

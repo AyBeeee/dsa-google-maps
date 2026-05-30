@@ -5,44 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void enqueue_path(path_node **head, path_node **tail, node *street,
-                  long long intersection_id, path_node *parent) {
-
-  path_node *new_path = malloc(sizeof(path_node));
-
-  new_path->street = street;
-  new_path->street->street = street->street;
-  new_path->intersection_id = intersection_id;
-  new_path->parent = parent;
-  new_path->name = street->name;
-  new_path->next = NULL;
-
-  if (*head == NULL) {
-    *head = new_path;
-  }
-
-  if (*tail != NULL) {
-    (*tail)->next = new_path;
-  }
-
-  *tail = new_path;
-}
-
-path_node *dequeue_path(path_node **head, path_node **tail) {
-  path_node *curr = *head;
-
-  if (*head == NULL)
-    return NULL;
-
-  *head = (*head)->next;
-
-  if (*head == NULL)
-    *tail = NULL;
-
-  curr->next = NULL;
-  return curr;
-}
-
 // idea is to keep going on this while loop until we encounter a new street
 // this way we print out less directions (since a lot of streets are long and
 // segmented into multiple intersections)
@@ -136,6 +98,31 @@ void build_path(queue *path, path_node *curr) {
   free(curr);
 }
 
+// helper function to make the BFS the tiniest bit less ugly
+//  checks indiscriminately from and to ids to save lines
+int node_in_visited(hashmap *visited, node *curr) {
+  int missing = 0;
+  int from_index =
+      hash_intersection(visited, curr->street->from_intersection_id);
+  int to_index = hash_intersection(visited, curr->street->to_intersection_id);
+
+  if (in_intersection(visited, from_index,
+                      curr->street->from_intersection_id) == NULL)
+    missing++;
+
+  if (in_intersection(visited, to_index, curr->street->to_intersection_id) ==
+      NULL) {
+    if (missing)
+      return BOTH;
+    else
+      return TO;
+  }
+  if (missing)
+    return FROM;
+  return NONE;
+}
+
+
 hashmap *init_visited(hashmap *visited, int table_size) {
   visited = malloc(sizeof(hashmap));
   visited->table_size = table_size;
@@ -148,78 +135,125 @@ hashmap *init_visited(hashmap *visited, int table_size) {
   return visited;
 }
 
+//init one queue for all possible starting exploration paths
+void init_exploration(explore_node **explore_head, explore_node **explore_tail, node **head_street, long long origin_intersection)
+{
+    while ((*head_street) != NULL) {
+      queue *initial_path = malloc(sizeof(queue));
+      init_queue(initial_path);
+      enqueue(initial_path, (*head_street));
+
+      explore_node *en = malloc(sizeof(explore_node));
+      en->street = (*head_street);
+      en->intersection_id = next_intersection((*head_street), origin_intersection);
+      en->path_so_far = initial_path;
+      en->next = NULL;
+      if ((*explore_head) == NULL)
+        (*explore_head) = en;
+      if ((*explore_tail) != NULL)
+        (*explore_tail)->next = en;
+      (*explore_tail) = en;
+
+      (*head_street) = (*head_street)->next;
+    }
+}
+
+void add_path_to_explore(explore_node **curr, node **connected_street, explore_node **head, explore_node **tail)
+{
+    // this is a bit heavy on the memory, but it's way easier to free later
+    queue *new_path = copy_queue((*curr)->path_so_far);
+    enqueue(new_path, (*connected_street));
+
+    explore_node *en = malloc(sizeof(explore_node));
+    en->street = (*connected_street);
+    en->intersection_id = next_intersection((*connected_street), (*curr)->intersection_id);
+    en->path_so_far = new_path;
+    en->next = NULL;
+    if ((*head) == NULL)
+      (*head) = en;
+    if ((*tail) != NULL)
+      (*tail)->next = en;
+    (*tail) = en;
+}
+
 queue *BFS(hashmap *graph, node *origin, node *destination) {
-  queue *path = malloc(sizeof(queue));
   hashmap *visited = NULL;
 
-  path_node *explore_head = NULL;
-  path_node *explore_tail = NULL;
-  long long origin_intersection = origin->street->from_intersection_id;
+  explore_node *explore_head = NULL;
+  explore_node *explore_tail = NULL;
 
-  init_queue(path);
   visited = init_visited(visited, graph->table_size);
 
   // mark all possible paths from starting intersection to be explored
-  node *head_street = get_connected_streets(graph, origin_intersection);
-  while (head_street != NULL) {
-    enqueue_path(&explore_head, &explore_tail, head_street,
-                 next_intersection(head_street, origin_intersection), NULL);
-    head_street = head_street->next;
-  }
+  node *head_street = get_connected_streets(graph, origin->street->from_intersection_id);
+  init_exploration(&explore_head, &explore_tail, &head_street, origin->street->from_intersection_id);
+  head_street = get_connected_streets(graph, origin->street->to_intersection_id);
+  init_exploration(&explore_head, &explore_tail, &head_street, origin->street->to_intersection_id);
 
-  // loop BFA alg until there's nothing else left to explore
-  path_node *curr_path = NULL;
+
+  // loop BFS until there's nothing left to explore
   while (explore_head != NULL) {
-    // grab a path to explore from the "to explore" queue, and then grab the
-    // street from it
-    curr_path = dequeue_path(&explore_head, &explore_tail);
-    node *curr_street = curr_path->street;
+    // grab a path to explore from the "to explore" queue, use it for this iteration.
+    explore_node *curr = explore_head;
+    // this is changing the head of the explore queues to the next queue, so the
+    // next iteration correctly grabs a different path
+    explore_head = explore_head->next;
+    if (explore_head == NULL)
+        explore_tail = NULL;
 
-    // if current street is our destination, we found the correct path
+    node *curr_street = curr->street;
+
+    // if current street is our destination, we found the correct path, return
     if (strcmp(curr_street->name, destination->name) == 0) {
-      build_path(path, curr_path);
+      queue *result = curr->path_so_far;
+      // make sure we have no leaks (fucking hell)
+      free(curr);
+      while (explore_head != NULL) {
+        explore_node *temp = explore_head;
+        explore_head = explore_head->next;
+        free_queue(temp->path_so_far);
+        free(temp);
+      }
       free_hash(visited);
-
-      // free_explore_path(explore_head);
-      return path;
+      return result;
     }
 
     // check whether the from_intersection or to_intersection are not visited
     int which_missing = node_in_visited(visited, curr_street);
     if (which_missing != NONE) {
       // mark them as visited depending on which ones weren't already
-      if (which_missing == BOTH || which_missing == TO) {
+      if (which_missing == BOTH || which_missing == TO)
+      {
         add_street_to_intersection(
             visited, curr_street->street->to_intersection_id,
             curr_street->street->to_intersection_lat,
             curr_street->street->to_intersection_lon, curr_street);
       }
-      if (which_missing == BOTH || which_missing == FROM) {
+      if (which_missing == BOTH || which_missing == FROM)
+      {
         add_street_to_intersection(
             visited, curr_street->street->from_intersection_id,
             curr_street->street->from_intersection_lat,
             curr_street->street->from_intersection_lon, curr_street);
       }
+
       // grab the intersection's bucket, and iterate through all nodes, marking
-      // them as explored if not already
+      // them as TO BE explored if not already
       node *connected_street =
-          get_connected_streets(graph, curr_path->intersection_id);
+          get_connected_streets(graph, curr->intersection_id);
       while (connected_street != NULL) {
         int which_missing = node_in_visited(visited, connected_street);
-        if (which_missing != NONE) {
-          enqueue_path(
-              &explore_head, &explore_tail, connected_street,
-              next_intersection(connected_street, curr_path->intersection_id),
-              curr_path);
-        }
+        // this shit's important: make sure we create a new path for each of these branching decisions
+        if (which_missing != NONE)
+            add_path_to_explore(&curr, &connected_street, &explore_head, &explore_tail);
         connected_street = connected_street->next;
       }
     }
+    // if all nodes in current path have already been explored, free the whole queue
+    free_queue(curr->path_so_far);
+    free(curr);
   }
-  if (visited)
-    free_hash(visited);
-  if (explore_head)
-    printf("hiii\n");
 
+  free_hash(visited);
   return NULL;
 }
