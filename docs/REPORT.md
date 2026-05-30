@@ -51,15 +51,13 @@ If connected streets were found by sequentially scanning the whole street list i
 
 ![Average lookup latency vs map size](report_images/latency_vs_map_size.png)
 
-The graph shows that the average latency of the sequential list search increases as the map size grows. This happens because sequential search has to scan through the street segment list until it finds the correct segment, so larger maps with more street segments require more comparisons.
+The sequential list search becomes slower as the map size grows because it scans the whole street segment list to find all streets connected to the chosen intersection. Larger maps have more street segments, so more comparisons are needed.
 
-In contrast, the intersections map search stays almost constant, even when the map becomes much larger. This is because the map approach does not scan all street segments. Instead, it uses the intersection id to directly access the corresponding bucket and retrieve the connected street segments.
+The intersections map stays almost constant because the intersection id is used to access the corresponding bucket directly. This avoids scanning all street segments, so it scales much better on larger maps.
 
-Therefore, the intersections map is more scalable than sequential search. As the number of street segments increases, sequential search becomes slower, while the intersections map keeps the lookup time very low.
+### Raw data
 
-### Raw Data
-
-The following table contains the raw latency measurements used to calculate the averages shown above. All values are in milliseconds.
+All values are in milliseconds.
 
 <details>
 <summary>Click to show raw latency data</summary>
@@ -81,38 +79,115 @@ The following table contains the raw latency measurements used to calculate the 
 
 ## 5. Path finding: list search vs intersections map by map size
 
-TODO: Add a plot comparing the latency of finding a path by looking for connected streets sequentially and by using the intersections map, depending on the map size. Keep the same origin and destination for this experiment.
+This experiment compares the latency of finding a path using sequential connected-street search and using the intersections map. The same origin and destination were used for every map.
 
-TODO: Add the raw data used for the plot.
+Origin: `41.403429, 2.193660`
+Destination: `41.404986, 2.194211`
 
-TODO: Explain the results.
+`xs_1` was skipped because it was too small for this path.
+
+| Map   | Street segments | Avg sequential connected-street search (ms) | Avg intersections map search (ms) |
+| ----- | --------------: | ------------------------------------------: | --------------------------------: |
+| xs_2  |              71 |                                      0.0038 |                            0.0013 |
+| md_1  |            1318 |                                      0.1072 |                            0.0014 |
+| lg_1  |            3797 |                                      0.3875 |                            0.0015 |
+| xl_1  |           18944 |                                      1.5542 |                            0.0026 |
+| 2xl_1 |           50623 |                                     54.4489 |                            0.0677 |
+
+![Path finding latency vs map size](report_images/path_finding_latency_vs_map_size.png)
+
+The results show that sequential connected-street search becomes much slower as the map size increases. This happens because the algorithm repeatedly has to find the streets connected to an intersection, and doing this sequentially requires scanning through the street segments.
+
+Using the intersections map is much faster because the connected streets are already grouped by intersection. Instead of scanning the whole street segment list, the algorithm directly accesses the bucket for the current intersection.
+
+The intersections map scales much better. Even though its latency increases slightly in the largest map, it remains much lower than the sequential approach.
+
+### Raw data
+
+All values are in milliseconds.
+
+<details>
+<summary>Click to show raw latency data</summary>
+
+| Test    | xs_2 sequential | xs_2 map | md_1 sequential | md_1 map | lg_1 sequential | lg_1 map | xl_1 sequential | xl_1 map | 2xl_1 sequential | 2xl_1 map |
+| ------- | --------------: | -------: | --------------: | -------: | --------------: | -------: | --------------: | -------: | ---------------: | --------: |
+| Test 1  |           0.005 |    0.002 |           0.116 |    0.003 |           0.393 |    0.005 |           1.464 |    0.010 |           54.409 |     0.139 |
+| Test 2  |           0.004 |    0.002 |           0.114 |    0.001 |           0.380 |    0.002 |           1.458 |    0.002 |           52.458 |     0.062 |
+| Test 3  |           0.003 |    0.003 |           0.106 |    0.002 |           0.382 |    0.001 |           1.453 |    0.002 |           59.350 |     0.060 |
+| Test 4  |           0.003 |    0.001 |           0.109 |    0.002 |           0.435 |    0.001 |           1.624 |    0.001 |           53.229 |     0.062 |
+| Test 5  |           0.004 |    0.001 |           0.103 |    0.001 |           0.386 |    0.001 |           1.573 |    0.002 |           52.347 |     0.060 |
+| Test 6  |           0.006 |    0.001 |           0.103 |    0.001 |           0.382 |    0.001 |           2.150 |    0.002 |           54.368 |     0.059 |
+| Test 7  |           0.003 |    0.000 |           0.104 |    0.001 |           0.379 |    0.001 |           1.517 |    0.002 |           53.031 |     0.059 |
+| Test 8  |           0.004 |    0.001 |           0.108 |    0.001 |           0.383 |    0.001 |           1.510 |    0.002 |           53.188 |     0.059 |
+| Test 9  |           0.003 |    0.001 |           0.101 |    0.001 |           0.377 |    0.001 |           1.402 |    0.001 |           58.593 |     0.058 |
+| Test 10 |           0.003 |    0.001 |           0.108 |    0.001 |           0.378 |    0.001 |           1.391 |    0.002 |           53.516 |     0.059 |
+
+</details>
+
 
 ## 6. Path finding: latency by distance
 
-TODO: Add a plot comparing the latency of finding a path between close points and far points in the same map. Compare the sequential list version and the intersections map version.
+This experiment compares the latency of finding a path between close, medium, and far points in the same map. The map used for every test was `xl_1`.
 
-TODO: Add the raw data used for the plot.
+| Distance case | Approximate distance (m) | Avg sequential connected-street search (ms) | Avg intersections map search (ms) |
+| ------------- | -----------------------: | ------------------------------------------: | --------------------------------: |
+| Close         |                   179.64 |                                      0.7157 |                            0.0026 |
+| Medium        |                  2324.36 |                                    339.6005 |                           53.8064 |
+| Far           |                  5163.80 |                                   1205.7942 |                          413.8119 |
 
-TODO: Explain the results.
+![Path finding latency vs distance](report_images/path_finding_latency_vs_distance.png)
 
-TODO: Fit a curve and justify it using the path-finding complexity from question 3.
+The results show that path finding latency increases as the origin and destination become farther apart. This happens because longer paths require the algorithm to explore more intersections and street segments before reaching the destination.
+
+The sequential connected-street search is slower because, every time the algorithm needs the streets connected to an intersection, it may have to scan through the street segment list. The intersections map version is faster because the connected streets are already grouped by intersection, so the algorithm can access them directly.
+
+I fitted a polynomial curve of degree 2. This is reasonable because the cost does not grow perfectly linearly with distance: as the destination gets farther away, BFS may explore a larger part of the graph. According to the path-finding complexity from question 3, the total cost depends on the number of explored streets and connections. The sequential version also has the extra cost of repeatedly scanning the street list, while the intersections map reduces the neighbor lookup cost.
+
+### Raw data
+
+All values are in milliseconds.
+
+<details>
+<summary>Click to show raw latency data</summary>
+
+| Test    | Close sequential | Close map | Medium sequential | Medium map | Far sequential | Far map |
+| ------- | ---------------: | --------: | ----------------: | ---------: | -------------: | ------: |
+| Test 1  |            0.714 |     0.011 |           340.881 |     54.244 |       1199.680 | 412.507 |
+| Test 2  |            0.698 |     0.002 |           341.862 |     54.154 |       1198.147 | 413.164 |
+| Test 3  |            0.696 |     0.002 |           340.792 |     53.575 |       1207.209 | 413.316 |
+| Test 4  |            0.694 |     0.002 |           337.681 |     53.842 |       1231.501 | 413.187 |
+| Test 5  |            0.693 |     0.001 |           338.766 |     53.441 |       1202.775 | 412.564 |
+| Test 6  |            0.688 |     0.002 |           338.230 |     53.677 |       1207.123 | 411.757 |
+| Test 7  |            0.704 |     0.001 |           338.087 |     53.889 |       1199.328 | 417.701 |
+| Test 8  |            0.790 |     0.002 |           338.637 |     53.627 |       1207.245 | 413.562 |
+| Test 9  |            0.745 |     0.001 |           342.810 |     53.861 |       1204.102 | 418.079 |
+| Test 10 |            0.735 |     0.002 |           338.259 |     53.754 |       1200.832 | 412.282 |
+
+</details>
+
 
 ## 7. Improving the visited data structure in BFS
 
-TODO: Describe an improvement to the visited data structure in BFS.
+In the current BFS implementation, `visited` is a list/queue of streets that have already been explored. This is correct, but it is not very efficient because checking if a street was already visited requires searching through the list.
 
-TODO: Justify which data structure you would use or have used instead of a list.
+The improvement I would use is a hash set for the visited streets. A hash set stores each visited street in a hash table, so the algorithm can check if a street was already visited much faster. In this project, the key could be the pair of intersection ids of the street segment, or the pointer to the street data.
 
-TODO: Describe the current runtime complexity and the improved runtime complexity.
+With the current list approach, checking if a street is already in `visited` costs `O(V)` in the worst case, where `V` is the number of visited streets. Since BFS performs this check many times while exploring connected streets, the total cost can become `O(E * V)`, where `E` is the number of connections explored. In road maps, `E` is usually close to `V`, so this often behaves like `O(V^2)`.
 
-TODO: Describe the latency or memory trade-offs.
+With a hash set, checking if a street was already visited is `O(1)` on average. This means the BFS complexity improves to `O(V + E)` on average, because each street and each connection is processed a constant number of times. The worst case can still be worse if many keys collide, but with a good hash function and enough space, the average case is much better than using a list.
+
+The main trade-off is memory usage. A hash set needs extra memory for the table, while a list only stores the visited streets one after another. It also makes the code a little more complex, because we need a hash function and insert/search operations. For larger maps, this trade-off is worth it because BFS checks `visited` very often.
 
 ## 8. Improving closest street search from latitude and longitude
 
-TODO: Describe an improvement to the algorithm that finds the closest street segment from a latitude and longitude.
+The current algorithm to find the closest street segment checks every street segment in the map. For each street, it calculates the distance between the user's coordinate and the midpoint of that street segment. It keeps the street with the smallest distance and returns it at the end. This is simple and correct, but it is slow for large maps because it always scans the full street list.
 
-TODO: Justify which data structure or algorithm you would use or have used.
+The improvement I would use is a spatial grid index. The idea is to divide the map into small rectangular cells using latitude and longitude. When the map is loaded, each street segment is inserted into the cell where its midpoint is located. Then, when the user gives a coordinate, the program checks the streets in the same cell and nearby cells instead of checking the whole map.
 
-TODO: Describe the current runtime complexity and the improved runtime complexity.
+I would choose a grid index because it is simpler to implement and understand than a more advanced structure like a k-d tree or quadtree. It also fits this project because the street data is already based on latitude and longitude.
 
-TODO: Describe the latency or memory trade-offs.
+With the current list approach, the runtime complexity is `O(S)` for every search, where `S` is the number of street segments. This is because the program must calculate the distance to every street midpoint.
+
+With a spatial grid, building the grid would cost `O(S)` when the map is loaded, because every street segment must be inserted once. After that, searching for the closest street would be much faster on average. If only `K` street segments are in the nearby cells that we check, the average search cost becomes `O(K)`, where `K` is much smaller than `S`. In the best case, the correct nearby cell contains very few streets, so the search is close to `O(1)`. The worst case can still be `O(S)` if many streets are in the same cell, or if the program has to expand the search to many cells.
+
+The main trade-off is memory usage. The grid stores extra lists of street segments for each cell, so it uses more memory than only keeping one linked list of all streets. There is also an extra preprocessing step when loading the map. Another downside is that the cell size must be chosen carefully. If the cells are too large, each cell contains too many streets and the search is still slow. If the cells are too small, the program may need to check many neighboring cells to avoid missing the closest street.
