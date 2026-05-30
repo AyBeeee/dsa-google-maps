@@ -33,8 +33,11 @@ int main(void) {
   init_list(&list);
   strcpy(list.map, "xs_1");
 
-  // LAB 2,3,4 TESTS
+  // LAB 2 TESTS
   test_house_parse_list(&list);
+  test_find_house(&list);
+
+  // LAB 3,4 TESTS
   test_places_parse_list(&list);
   test_streets_parse_list(&list);
 
@@ -58,14 +61,35 @@ int main(void) {
   allsuccess();
 }
 
-// ######################### UNIT TESTS FOR LAB 2,3,4 #########################
+// ######################### UNIT TESTS FOR LAB 2 #########################
 
 // simply create the linked lists as per usual, if everything works it should
 // return int != -1
 void test_house_parse_list(list_map *list) {
   assert(load_houses(list) != -1);
+  assert(list->head_houses != NULL);
+  assert(list->tail_houses != NULL);
+  assert(list->size_houses == 63);
   printf("Test Parse Houses.txt and Linked List Creation Passed!\n");
 }
+
+void test_find_house(list_map *list) {
+  node *curr = list->head_houses;
+
+  while (curr != NULL) {
+    if (strcmp(curr->name, "c. pompeu fabra") == 0 &&
+        curr->house->num == 9) {
+      assert(curr->lat == 13.000000);
+      assert(curr->lon == 34.333333);
+      printf("Test Find House Successful\n");
+      return;
+    }
+
+    curr = curr->next;
+  }
+}
+
+// ######################### UNIT TESTS FOR LAB 3,4 #########################
 
 void test_places_parse_list(list_map *list) {
   assert(load_places(list) != -1);
