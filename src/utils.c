@@ -19,9 +19,9 @@ void latlon_to_xy(double lat_ref, double lon_ref, double lat, double lon,
 // determine whether the street turns left (> 0) or right (< 0). util function
 // to figure out whether the user needs to turn left or right
 int cross_product(node *from, node *to) {
-  double Ax, Ay;
-  double Bx, By;
-  double Cx, Cy;
+  double Ax = 0.0, Ay = 0.0;
+  double Bx = 0.0, By = 0.0;
+  double Cx = 0.0, Cy = 0.0;
 
   // situation 1: from.from -> from.to == to.from -> to.to
   if (from->street->to_intersection_id == to->street->from_intersection_id) {

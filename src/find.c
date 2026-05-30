@@ -60,7 +60,7 @@ node *find_node(list_map *list, char *street, int ntype) {
   int threshold = 7;
   int street_found = 0;
   char *matched_street = street;
-  char choice;
+  char choice = '\0';
   int num = -1;
   int place_matches = 0;
   node *first_place_match = NULL;
