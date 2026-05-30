@@ -72,10 +72,11 @@ typedef struct {
 } queue;
 
 typedef struct explore_node {
-    node *street;
-    long long intersection_id;
-    queue *path_so_far;
-    struct explore_node *next;
+  node *street;
+  long long intersection_id;
+  double distance;
+  queue *path_so_far;
+  struct explore_node *next;
 } explore_node;
 
 #endif

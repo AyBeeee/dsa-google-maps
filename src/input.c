@@ -40,8 +40,10 @@ void ask_map(list_map *list) {
 node *ask(list_map *list, int stype) {
   if (stype == ORIGIN)
     printf("--- ORIGIN ---\n");
-  else if (stype == DESTINATION)
+  else if (stype == DESTINATION) {
+    printf("\n");
     printf("--- DESTINATION ---\n");
+  }
   return (ask_node(list));
 }
 

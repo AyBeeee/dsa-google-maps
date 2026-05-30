@@ -31,7 +31,8 @@ void print_path(queue *path, node *origin, node *destination) {
 
   while (from != NULL && to != NULL) {
 
-    // calculate the distance of the street and the cross product to know where to turn
+    // calculate the distance of the street and the cross product to know where
+    // to turn
     int direction = cross_product(from, to);
     double distance = to->street->length_meters;
 
@@ -39,7 +40,8 @@ void print_path(queue *path, node *origin, node *destination) {
     node *current = to;
     node *next = dequeue(path);
 
-    // add distance if the street is the same (we do this to avoid the segmentations of the streets)
+    // add distance if the street is the same (we do this to avoid the
+    // segmentations of the streets)
     while (next != NULL && strcmp(current->name, next->name) == 0) {
       distance += next->street->length_meters;
       free(current);
@@ -47,13 +49,14 @@ void print_path(queue *path, node *origin, node *destination) {
       next = dequeue(path);
     }
 
-
-    if (direction == RIGHT)
-      printf("turn right to ");
+    if (strcmp(from->name, current->name) == 0)
+      printf("Continue to ");
+    else if (direction == RIGHT)
+      printf("Turn right to ");
     else if (direction == LEFT)
-      printf("turn left to ");
+      printf("Turn left to ");
     else
-      printf("continue to ");
+      printf("Continue to ");
 
     // truncate the decimals, we really dont care about centimeters
     printf("%s and continue for %im\n", current->name, (int)distance);
@@ -61,7 +64,6 @@ void print_path(queue *path, node *origin, node *destination) {
     free(from);
     from = current;
     to = next;
-    
   }
   free(from);
   free(path);
@@ -107,6 +109,7 @@ void add_path_to_explore(explore_node **curr, node **connected_street,
   en->intersection_id = (*connected_street)->street->to_intersection_id;
   en->path_so_far = new_path;
   en->next = NULL;
+  en->distance = 0; // unused by BFS
   if ((*head) == NULL)
     (*head) = en;
   if ((*tail) != NULL)
@@ -130,6 +133,7 @@ queue *BFS(hashmap *graph, node *origin, node *destination) {
   explore_node *initial = malloc(sizeof(explore_node));
   initial->street = origin;
   initial->intersection_id = origin->street->to_intersection_id;
+  initial->distance = 0; // unused by BFS
   initial->path_so_far = initial_path;
   initial->next = NULL;
 
@@ -150,7 +154,7 @@ queue *BFS(hashmap *graph, node *origin, node *destination) {
     node *curr_street = curr->street;
 
     // if current street is our destination, we found the correct path, return
-  if (curr_street->street == destination->street) {
+    if (curr_street->street == destination->street) {
       queue *result = curr->path_so_far;
       // make sure we have no leaks (fucking hell)
       free(curr);
@@ -184,6 +188,80 @@ queue *BFS(hashmap *graph, node *origin, node *destination) {
     }
     // if all nodes in current path have already been explored, free the whole
     // queue
+    free_queue(curr->path_so_far);
+    free(curr);
+  }
+
+  free_hash(visited);
+  return NULL;
+}
+
+// #################### DIJKSTRA ########################
+
+queue *Dijkstra(hashmap *graph, node *origin, node *destination) {
+  hashmap *visited =
+      init_visited(NULL, graph->table_size); // init visited hashmap empty
+
+  queue *initial_path = malloc(sizeof(queue));
+  init_queue(initial_path);
+  enqueue(initial_path, origin);
+
+  explore_node *head = malloc(sizeof(explore_node));
+  head->street = origin;
+  head->intersection_id = origin->street->to_intersection_id;
+  head->distance = 0;
+  head->path_so_far = initial_path;
+  head->next = NULL;
+
+  explore_node *tail = head;
+
+  // start exploring
+  while (head != NULL) {
+    explore_node *curr = head;
+    head = head->next;
+
+    if (head == NULL)
+      tail = NULL;
+
+    // if we have found the destination stop, free everything and return the
+    // result path
+    if (curr->street->street == destination->street) {
+      queue *result = curr->path_so_far; // queue the result path with the path
+                                         // we already have
+      free(curr);
+
+      while (head != NULL) {
+        explore_node *temp = head;
+        head = head->next;
+        free_queue(temp->path_so_far);
+        free(temp);
+      }
+
+      free_hash(visited);
+      return result;
+    }
+
+    // if the street hasn't been visited we add it to the intersection
+    if (!street_in_visited(visited, curr->street)) {
+      add_street_to_intersection(
+          visited, curr->street->street->from_intersection_id,
+          curr->street->street->from_intersection_lat,
+          curr->street->street->from_intersection_lon, curr->street);
+
+      node *connected = get_connected_streets(
+          graph,
+          curr->intersection_id); // get the connected streets to expand it
+
+      // while there are connected streets, expand the visited graph taking in
+      // account the weights
+      while (connected != NULL) {
+        if (!street_in_visited(visited, connected))
+          add_weighted_path(curr, connected, &head, &tail);
+
+        connected = connected->next;
+      }
+    }
+
     free_queue(curr->path_so_far);
     free(curr);
   }

@@ -399,3 +399,50 @@ void free_queue(queue *q) {
   }
   free(q);
 }
+
+// ############ DIJKSTRA HELPERS ####################
+// Insert into the pending exploration list ordered by distance.
+void insert_by_distance(explore_node **head, explore_node **tail,
+                        explore_node *new_node) {
+
+  // If the list is empty or the new node is closer, insert it at the head.
+  if (*head == NULL || new_node->distance < (*head)->distance) {
+    new_node->next = *head;
+    *head = new_node;
+
+    if (*tail == NULL)
+      *tail = new_node;
+
+    return;
+  }
+
+  explore_node *curr = *head;
+
+  while (curr->next != NULL && curr->next->distance <= new_node->distance) {
+    curr = curr->next;
+  }
+
+  new_node->next = curr->next;
+  curr->next = new_node;
+
+  if (new_node->next == NULL)
+    *tail = new_node;
+}
+
+void add_weighted_path(explore_node *curr, node *connected_street,
+                       explore_node **head, explore_node **tail) {
+
+  // create the new path for the curr node
+  queue *new_path = copy_queue(curr->path_so_far);
+  enqueue(new_path, connected_street);
+
+  explore_node *new_node = malloc(sizeof(explore_node));
+
+  new_node->street = connected_street;
+  new_node->intersection_id = connected_street->street->to_intersection_id;
+  new_node->distance = curr->distance + connected_street->street->length_meters;
+  new_node->path_so_far = new_path;
+  new_node->next = NULL;
+
+  insert_by_distance(head, tail, new_node);
+}

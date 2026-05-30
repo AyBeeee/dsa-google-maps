@@ -43,7 +43,8 @@ int main() {
     return 1;
   }
 
-  queue *path = BFS(list.graph, origin, destination);
+  // queue *path = BFS(list.graph, origin, destination);
+  queue *path = Dijkstra(list.graph, origin, destination);
 
   if (!path) {
     printf("Couldn't find a path to the destination\n");

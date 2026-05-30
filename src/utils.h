@@ -34,5 +34,9 @@ void free_hash(hashmap *graph);
 int is_prime(int n);
 queue *copy_queue(queue *original);
 void free_queue(queue *q);
+void insert_by_distance(explore_node **head, explore_node **tail,
+                        explore_node *new_node);
+void add_weighted_path(explore_node *curr, node *connected_street,
+                       explore_node **head, explore_node **tail);
 
 #endif
