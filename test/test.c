@@ -19,6 +19,7 @@ void test_load_streets_into_graph(list_map *list);
 void test_find_intersection_and_add_street(list_map *list);
 void test_freeing_hashmap(list_map *list);
 void test_places_parse_list(list_map *list);
+void test_find_place(list_map *list);
 void test_streets_parse_list(list_map *list);
 void free_map(list_map *list);
 void test_queue(queue *q, node *test_node);
@@ -39,6 +40,7 @@ int main(void) {
 
   // LAB 3,4 TESTS
   test_places_parse_list(&list);
+  test_find_place(&list);
   test_streets_parse_list(&list);
 
   // LAB 5 UNIT TESTS
@@ -89,12 +91,34 @@ void test_find_house(list_map *list) {
   }
 }
 
-// ######################### UNIT TESTS FOR LAB 3,4 #########################
+// ######################### UNIT TESTS FOR LAB 3 #########################
 
 void test_places_parse_list(list_map *list) {
   assert(load_places(list) != -1);
+  assert(list->head_places != NULL);
+  assert(list->tail_places != NULL);
+  assert(list->size_places == 1);
   printf("Test Parse Places.txt and Linked List Creation Passed!\n");
 }
+
+void test_find_place(list_map *list) {
+  node *curr = list->head_places;
+
+  while (curr != NULL) {
+    if (strcmp(curr->place->amenity, "amenity:university") == 0) {
+      assert(curr->lat == 13.000000);
+      assert(curr->lon == 34.333333);
+      printf("Test Find Place Successful!\n");
+      return;
+    }
+
+    curr = curr->next;
+  }
+
+  assert(0);
+}
+
+// ######################### UNIT TESTS FOR LAB 4 #########################
 
 void test_streets_parse_list(list_map *list) {
   assert(load_streets(list) != -1);
