@@ -25,9 +25,11 @@ void test_find_street(list_map *list);
 void free_map(list_map *list);
 void test_queue(queue *q, node *test_node);
 void test_bfs(void);
+void test_dijkstra(void);
 void test_cross_product(void);
 void test_free_queue(void);
 queue *BFS(hashmap *graph, node *origin, node *destination);
+queue *Dijkstra(hashmap *graph, node *origin, node *destination);
 
 int main(void) {
 
@@ -59,6 +61,7 @@ int main(void) {
   test_queue(q, test_node);
   test_cross_product();
   test_bfs();
+  test_dijkstra();
   test_freeing_hashmap(&list);
   test_free_queue();
   printf("Lab 6 Unit Tests Passed!\n\n");
@@ -390,6 +393,21 @@ void test_bfs(void) {
   assert(strcmp(path->head->next->name, "to_street") == 0);
 
   printf("Test bfs passed successfully\n");
+}
+
+void test_dijkstra(void) {
+  hashmap graph = {0};
+  data_streets street_data = {0};
+  node street = {0};
+
+  graph.table_size = 1;
+  street.street = &street_data;
+
+  queue *path = Dijkstra(&graph, &street, &street);
+
+  assert(path != NULL);
+  free_queue(path);
+  printf("Test dijkstra passed successfully\n");
 }
 
 void test_free_queue() {
