@@ -28,13 +28,13 @@ If the program does not find an exact match, it may also calculate the Levenshte
 
 The path-finding algorithm is Breadth First Search (BFS). I use `V` for the number of streets or intersections visited by BFS, and `E` for the number of connections explored.
 
-BFS starts from the origin street and explores the graph level by level using a queue. First it checks all streets that are one step away, then all streets that are two steps away, and so on. It also keeps a `visited` list so that the same street is not processed many times. With BFS, the first route found is the route with the smallest number of street segments, but not necessarily the shortest route in meters.
+BFS starts from the origin street and explores the graph level by level using a queue. First it checks all streets that are one step away, then all streets that are two steps away, and so on. It also keeps a `visited` hash table so that the same part of the graph is not processed many times. With BFS, the first route found is the route with the smallest number of street segments, but not necessarily the shortest route in meters.
 
 The best case is `O(1)` if the origin is already the destination or if the destination is found immediately.
 
-If connected streets are found with the intersections map and `visited` checks were constant time, the normal BFS complexity would be `O(V + E)`, because every visited node and every explored connection is processed once.
+In the current implementation, connected streets are found with the intersections map and `visited` is also stored with a hash table. On average, the BFS complexity is `O(V + E)`, because each visited node and each explored connection is processed a constant number of times.
 
-However, if `visited` is stored as a linked list, checking whether a street was already visited costs `O(V)` in the worst case. Since this check can happen for many explored connections, the current version can cost up to `O(E * V)` in the worst case. In a road map, where the number of connections is usually close to linear in the number of intersections, this often behaves closer to `O(V^2)`.
+The worst case can be worse if the hash table has many collisions, because a hash lookup can become linear inside one bucket. In that case, the cost can move closer to `O(E * V)`. With a good hash function and enough buckets, the expected case is still `O(V + E)`.
 
 If connected streets were found by sequentially scanning the whole street list instead of using the intersections map, the algorithm would be even slower, because each BFS step could require scanning all `S` street segments.
 
@@ -168,15 +168,15 @@ All values are in milliseconds.
 
 ## 7. Improving the visited data structure in BFS
 
-In the current BFS implementation, `visited` is a list/queue of streets that have already been explored. This is correct, but it is not very efficient because checking if a street was already visited requires searching through the list.
+The improvement for the `visited` data structure is to use a hash table instead of a list/queue. In our final BFS implementation, `visited` is stored as a hash map of intersection ids that have already been reached.
 
-The improvement I would use is a hash set for the visited streets. A hash set stores each visited street in a hash table, so the algorithm can check if a street was already visited much faster. In this project, the key could be the pair of intersection ids of the street segment, or the pointer to the street data.
+This is useful because BFS checks `visited` very often. If `visited` is a list, the program has to scan the list to know whether a street or intersection was already visited. With a hash table, the program uses the intersection id as a key and goes directly to the corresponding bucket.
 
-With the current list approach, checking if a street is already in `visited` costs `O(V)` in the worst case, where `V` is the number of visited streets. Since BFS performs this check many times while exploring connected streets, the total cost can become `O(E * V)`, where `E` is the number of connections explored. In road maps, `E` is usually close to `V`, so this often behaves like `O(V^2)`.
+With a list approach, checking if an element is already in `visited` costs `O(V)` in the worst case, where `V` is the number of visited elements. Since BFS performs this check many times while exploring connected streets, the total cost can become `O(E * V)`, where `E` is the number of connections explored. In road maps, `E` is usually close to `V`, so this can behave like `O(V^2)`.
 
-With a hash set, checking if a street was already visited is `O(1)` on average. This means the BFS complexity improves to `O(V + E)` on average, because each street and each connection is processed a constant number of times. The worst case can still be worse if many keys collide, but with a good hash function and enough space, the average case is much better than using a list.
+With the hash table, checking if an intersection was already visited is `O(1)` on average. This improves BFS to `O(V + E)` on average, because each visited element and each connection is processed a constant number of times. The worst case can still be worse if many keys collide in the same bucket, but with a good table size the average case is much better than using a list.
 
-The main trade-off is memory usage. A hash set needs extra memory for the table, while a list only stores the visited streets one after another. It also makes the code a little more complex, because we need a hash function and insert/search operations. For larger maps, this trade-off is worth it because BFS checks `visited` very often.
+The main trade-off is memory usage. A hash table needs extra memory for the buckets, while a list only stores the visited elements one after another. It also makes the code a little more complex, because we need a hash function and insert/search operations. For larger maps, this trade-off is worth it because BFS checks `visited` very often.
 
 ## 8. Improving closest street search from latitude and longitude
 
